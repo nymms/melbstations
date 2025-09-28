@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Melb PT Departure Board</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Network Sans 2019', Arial, sans-serif;
+            background-color: #000;
+            color: #333434;
+        }
+
+        /* The station board is now the hover zone for the header */
+        .station-board {
+            width: 800px;
+            margin: 0 auto;
+            position: relative;
+            left: 0;
+        }
+
+        /* Hidden checkbox to manage the 'pinned' state with pure CSS */
+        .hidden-pin-toggle {
+            display: none;
+        }
+
+        .pin-button {
+            position: absolute;
+            top: 150px;
+            left: -5px;
+            cursor: pointer;
+            z-index: 1002;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background-color 0.2s ease;
+        }
+
+        .pin-button svg {
+            width: 24px;
+            height: 24px;
+            fill: #333434; /* Light grey for the unpinned state */
+            transition: transform 0.3s ease-out;
+        }
+
+        .pin-button:hover svg {
+            fill: #707372;
+            transition: transform 0.3s ease-out;
+        }
+
+        /* Rotate the pin and change its color when it's in the 'checked' state */
+        .hidden-pin-toggle:checked + .pin-button svg {
+            transform: rotate(45deg);
+            fill: #707372; /* Darker grey for the pinned state */
+        }
+
+        .settings {
+            /* Settings now use flex to place select boxes on a single line */
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Space between the two select boxes */
+            padding: 12px;
+            /* Hidden by default, toggled via JS */
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            position: relative;
+            left: 60px;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        /* Settings Auto-Hide: Visible ONLY when hovering over the board AND the .visible class is present. (Pin state is ignored.) */
+        .station-board:hover .settings.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .station-header {
+            width: 100%;
+            background-color: #fff;
+            padding: 12px;
+            text-align: center;
+            border-radius: 8px 8px 24px 24px;
+            box-shadow: inset 0 8px 8px -10px rgba(0, 0, 0, 0.8);
+            /* Start hidden above the viewport, accounting for its bottom margin */
+            margin-top: calc(-1 * (var(--header-height, 130px) + 12px));
+            transition: margin-top 0.5s ease-out;
+            position: relative;
+            z-index: 1001;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        /* The header becomes visible when the pin is checked OR the board is hovered over and the pin is NOT checked */
+        .hidden-pin-toggle:checked ~ .station-header,
+        .station-board:hover .hidden-pin-toggle:not(:checked) ~ .station-header {
+            margin-top: 0; /* Pushes the header down into view */
+        }
+        
+        .station-name {
+            font-size: 56px;
+            font-weight: 600;
+            padding-top: 16px;
+            border-top: 16px solid #0072CE;
+            margin-bottom: 10px;
+            width: 100%;
+            height: 100px
+        }
+
+        .departure-item {
+            --route-bg-color: #95979A;
+            --route-text-color: #000000;
+
+            background-color: #fff;
+            margin: 0 auto 5px auto;
+            overflow: hidden;
+        }
+        
+        .departure-header {
+            padding: 15px 20px 0px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 16px solid var(--route-bg-color, #95979A);
+            height: 70px;
+        }
+        
+        .time-destination {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .departure-time {
+            font-size: 38px;
+            font-family: 'Network Sans 2019', Arial, sans-serif;
+            color: #000;
+        }
+        
+        .destination {
+            font-size: 42px;
+            font-family: 'Network Sans 2019', Arial, sans-serif;
+            font-weight: 600;
+            color: #000;
+        }
+        
+        .alert-icon {
+            width: 32px;
+            height: 32px;
+            background-color: #FE5000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 24px;
+        }
+        
+        .time-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .delay-indicator {
+            color: #FE5000;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .duration {
+            background-color: #000;
+            color: #fff;
+            padding: 8px;
+            font-size: 28px;
+            font-weight: normal;
+            min-width: 100px;
+            text-align: center;
+            height: 50px;
+        }
+
+        .route-info {
+            padding: 8px 20px 8px 20px;
+            font-size: 24px;
+            font-weight: 200;
+            color: #000;
+            justify-content: space-between;
+            align-items: center;
+            height: 50px;
+        }
+        
+        .departure-header .platform {
+            background-color: var(--route-bg-color, #95979A);
+            color: var(--route-text-color, #000000);
+            padding: 8px;
+            font-size: 28px;
+            font-weight: 900;
+            width: 40px;
+            height: 50px;
+            text-align: center;
+        }
+
+        .station-header .platform {
+            font-size: 90px;
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 0px;
+            margin-left: 10px;
+            flex-shrink: 0;
+            width: 100px;
+            height: 120px;
+            border-left: solid 2px #95979A;
+
+        }
+
+        /* Route colors */
+        .route-color {color: #95979A;}
+        .route-bgcolor {background-color: #95979A; color: #000000;}
+
+        .next-stations {
+            padding: 0px 20px 15px 0px;
+            margin-left: 20px;
+            margin-right: 20px;
+            border-top: 3px solid #000;
+            min-height: 300px;
+        }
+
+        .stations-list {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .stations-column {
+            display: flex;
+            flex-direction: column;
+            width: 33%;
+            padding-top: 12px;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+
+        .stations-column::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 25px;
+            height: 25px;
+            background-color: var(--route-bg-color, #95979A);
+            z-index: 1;
+            mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+            -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+        }
+
+        .stations-column:first-child::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 25px;
+            height: 25px;
+            background-color: var(--route-bg-color, #95979A);
+            z-index: 1;
+            mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="0" x2="11" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+            -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="0" x2="11" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+        }
+
+        .stations-column:first-child {
+            padding-top: 8px;
+        }
+
+        .next-station {
+            color: #000;
+            font-size: 22px;
+            font-weight: normal;
+            padding-left: 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            border-left: 6px solid var(--route-bg-color, #95979A);
+        }
+
+        .next-station::before {
+            content: '◼︎';
+            font-weight: 900;
+            font-size: 12px;
+            position: absolute;
+            left: -2px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--route-bg-color, #95979A);
+        }
+
+        .next-station.current {
+            color: #000;
+            border-left: 6px solid var(--route-bg-color, #95979A);
+        }
+
+        .next-station.current .station-text {
+            padding: 2px 4px;
+            background-color: var(--route-bg-color, #95979A);
+            color: var(--route-text-color, #95979A);
+        }
+
+        .next-station.last-station {
+            border-left: none !important;
+            padding-left: 25px;
+        }
+
+        .next-station.last-station::after {
+            display: none !important;
+        }
+
+        /* terminating station T symbol */
+        .next-station.last-station::before {
+            content: '';
+            display: inline-block;
+            position: absolute;
+            left: -10px;
+            top: 8px;
+            width: 25px;
+            height: 25px;
+            background-color: var(--route-bg-color, #95979A);
+            mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="20" y1="75" x2="80" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="50" y1="0" x2="50" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+            -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="20" y1="75" x2="80" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="50" y1="0" x2="50" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+        }
+
+        /* station route continuation dashes */
+        .stations-column .next-station:last-child:not(.last-station)::after {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 41px;
+            transform: translateY(-50%);
+            width: 25px;
+            height: 25px;
+            background-color: var(--route-bg-color, #95979A);
+            mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+            -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+        }
+
+        .last-updated {
+            font-size: 8px;
+            padding: 2px;
+            color: #d3d3d3;
+        }
+
+        #settingsButton {
+            background: none;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            display: inline-flex;
+            align-items: center;
+            position: absolute; /* Position button within the header/board */
+            left: 27px; /* Aligned to the right */
+            top: 150px; /* Pushed down slightly */
+            z-index: 1003;
+        }
+
+        #settingsButton svg {
+            margin: 5px; 
+            width: 20px;
+            height: 20px;
+            display: block; 
+            fill: #ededed; /* Initial color when hidden (light gray) */
+        }
+
+        #settingsButton:hover #gearOutline {
+            fill: #707372; 
+        } 
+        #gearOutline {
+            transition: fill 0.3s ease;
+        }
+
+        .settings select {
+            padding: 2px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        .no-trains {
+            font-size: 42px;
+            text-align: center;
+            color: #333434;
+        }
+
+        .next-stations:has(.no-trains) {
+          /* Your styles for .next-stations when .no-trains is inside it */
+          border: none;
+        }
+
+        .network-dings {
+            font-family: 'Network-Dings-2019';
+            font-size: 72px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="station-board">
+        <input type="checkbox" id="pin-toggle" class="hidden-pin-toggle">
+        <label for="pin-toggle" class="pin-button">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M16 12V4H17V2H7V4H8V12L6 14V16H11.2V22H12.8V16H18V14L16 12Z" />
+            </svg>
+        </label>
+        <div class="station-header">
+            <div class="station-name"></div>
+            <div class="platform"></div>
+            <!-- The settings button is now INSIDE the header div -->
+            <button id="settingsButton" aria-expanded="false" aria-controls="settings-panel" title="Toggle Settings">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                    <path id="gearOutline" d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" fill="#333434" />
+                    <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" fill="#000000"/>
+                </svg>
+            </button>
+        </div>
+        <!-- The settings panel is now positioned directly after the header -->
+        <div class="settings" id="settings-panel">
+            <select id="stationSelect">
+            <option value="">Select Station...</option>
+            </select>
+            <select id="platformSelect" style="width:40px;">
+            <option value="">All Platforms</option>
+            </select>
+        </div>
+        <div class="departure-item" style="display: block;">
+            <div class="departure-header">
+                <div class="time-destination">
+                    <span class="departure-time"></span>
+                    <span class="destination"></span>
+                </div>
+                <div class="time-info">
+                    <div class="delay-indicator"></div>
+                    <div class="duration"></div>
+                </div>
+            </div>
+            <div class="route-info"><span></span></div>
+            <div class="next-stations">
+                <div class="stations-list">
+                </div>
+            </div>
+            <div class="last-updated" id="lastUpdated">Loading...</div>
+        </div>
+    </div>
+</body>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const departureItem = document.querySelector('.departure-item');
+        const destinationElement = document.querySelector('.destination');
+        const platformElement = document.querySelector('.departure-header .platform');
+        const headerPlatformElement = document.querySelector('.station-header .platform');
+        const stationNameElement = document.querySelector('.station-name');
+        const lastUpdatedElement = document.getElementById('lastUpdated');
+        const routeInfoElement = document.querySelector('.route-info span');
+        const departureTimeElement = document.querySelector('.departure-time');
+        const delayIndicatorElement = document.querySelector('.delay-indicator');
+        const durationElement = document.querySelector('.duration');
+        const headerElement = document.querySelector('.station-header');
+        const stationBoardElement = document.querySelector('.station-board');
+        const settingsButton = document.getElementById('settingsButton');
+        const settingsPanel = document.getElementById('settings-panel');
+        
+        let currentStopId = 1127; // default
+        let currentPlatform = "1"; // default platform 1
+
+        const getDepartureApiUrl = () => {
+            const baseUrl = `https://melbptboard-opt.onrender.com/api/next-departure?stop_id=${currentStopId}`;
+            return currentPlatform ? `${baseUrl}&platform=${currentPlatform}` : baseUrl;
+        };
+        
+        let stationsData = null;
+
+        const routeColors = {
+            3: { background: '#FFBE00', text: '#000000' },
+            14: { background: '#FFBE00', text: '#000000' },
+            15: { background: '#FFBE00', text: '#000000' },
+            6: { background: '#028430', text: '#FFFFFF' },
+            16: { background: '#028430', text: '#FFFFFF' },
+            17: { background: '#028430', text: '#FFFFFF' },
+            12: { background: '#F178AF', text: '#000000' },
+            4: { background: '#279FD5', text: '#000000' },
+            11: { background: '#279FD5', text: '#000000' },
+            2: { background: '#152C6B', text: '#FFFFFF' },
+            9: { background: '#152C6B', text: '#FFFFFF' },
+            1: { background: '#152C6B', text: '#FFFFFF' },
+            7: { background: '#152C6B', text: '#FFFFFF' },
+            5: { background: '#BE1014', text: '#FFFFFF' },
+            8: { background: '#BE1014', text: '#FFFFFF' },
+            88: { background: '#95979A', text: '#000000' },
+            13: { background: '#95979A', text: '#000000' }
+        };
+
+        const loadStations = async () => {
+            try {
+                const response = await fetch('https://raw.githubusercontent.com/nymms/melbstations/main/stations.json');
+                const data = await response.json();
+                stationsData = data.stations;
+            } catch (error) {
+                console.error('Failed to load stations.json:', error);
+            }
+        };
+
+        const getStationName = (stopId) => {
+            if (!stationsData) return `Stop ${stopId}`;
+            const station = stationsData.find(s => s.stop_id === stopId);
+            return station ? station.stop_name : `Stop ${stopId}`;
+        };
+
+        const populateStationDropdown = () => {
+            const select = document.getElementById('stationSelect');
+            if (stationsData) {
+                stationsData.forEach(station => {
+                    const option = document.createElement('option');
+                    option.value = station.stop_id;
+                    option.textContent = station.stop_name;
+                    select.appendChild(option);
+                });
+                
+                select.value = currentStopId;
+                
+                select.addEventListener('change', (e) => {
+                    currentStopId = parseInt(e.target.value);
+                    if (currentStopId) {
+                        updatePlatformDropdown();
+                        updateBoard();
+                    }
+                });
+                
+                const platformSelect = document.getElementById('platformSelect');
+                platformSelect.addEventListener('change', (e) => {
+                    currentPlatform = e.target.value;
+                    updateBoard();
+                });
+            }
+        };
+
+        const updatePlatformDropdown = () => {
+            const select = document.getElementById('platformSelect');
+            const station = stationsData.find(s => s.stop_id === currentStopId);
+            const platformCount = station ? station.number_of_platforms : 2;
+            
+            select.innerHTML = '<option value="">All Platforms</option>';
+            
+            for (let i = 1; i <= platformCount; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `${i}`;
+                select.appendChild(option);
+            }
+            
+            select.value = platformCount >= 1 ? "1" : "";
+            currentPlatform = select.value;
+        };
+
+        const loadStoppingPattern = async (runId) => {
+            try {
+                console.log('Loading stops for run_id:', runId);
+                const response = await fetch(`https://melbptboard-opt.onrender.com/api/run/stops?run_id=${runId}`);
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    console.log('Response not OK');
+                    return null;
+                }
+                
+                const data = await response.json();
+                console.log('Raw stops data:', data);
+                console.log('Departures array:', data.departures);
+                
+                return data.stops || [];
+            } catch (error) {
+                console.error('Failed to load stopping pattern:', error);
+                return null;
+            }
+        };  
+
+        const calculateColumnDistribution = (numStops) => {
+            if (numStops <= 7) {
+                return { columns: 1, distribution: [numStops] };
+            }
+            
+            if (numStops <= 14) {
+                const col1 = Math.ceil(numStops / 2);
+                const col2 = numStops - col1;
+                return { columns: 2, distribution: [col1, col2] };
+            }
+            
+            if (numStops <= 24) {
+                const base = Math.floor(numStops / 3);
+                const remainder = numStops % 3;
+                const distribution = [base, base, base];
+                
+                for (let i = 0; i < remainder; i++) {
+                    distribution[i]++;
+                }
+                return { columns: 3, distribution };
+            }
+            
+            const col3 = numStops - 20;
+            return { columns: 3, distribution: [10, 10, col3] };
+        };
+
+        // route-info analysis
+        const analyzeInboundRoute = (stops, currentStopId) => {
+            const cityStations = [1155, 1071, 1181, 1068, 1120];
+            const loopStations = [1068, 1120, 1155]; // Flagstaff, Melbourne Central, Parliament
+            
+            const currentIndex = stops.findIndex(stop => stop.stop_id === currentStopId);
+            if (currentIndex === -1) return null;
+            
+            const remainingStops = stops.slice(currentIndex);
+            // Skip the current station when looking for future city stations
+            const futureCityStationsOnly = remainingStops.slice(1).map(stop => stop.stop_id);
+
+            // Check if any city stations are ahead
+            const hasFutureCityStations = futureCityStationsOnly.some(id => cityStations.includes(id));
+            if (!hasFutureCityStations) return null; // Not inbound
+
+            // Find the first city station in the remaining journey
+            const firstCityStation = futureCityStationsOnly.find(id => cityStations.includes(id));
+
+            if (firstCityStation === 1071) {
+                return "Direct to Flinders Street";
+            }
+
+            // For non-Flinders first stations, check pattern
+            const hasLoopStations = futureCityStationsOnly.some(id => loopStations.includes(id));
+
+            if (hasLoopStations) {
+                return "via the City Loop";
+            }
+
+            if (firstCityStation === 1181) {
+                return "via Southern Cross";
+            }
+
+            return "to City";
+        };
+
+        const analyzeOutboundRoute = (stops, currentStopId) => {
+            const loopStations = [1068, 1120, 1155]; // Flagstaff, Melbourne Central, Parliament
+            
+            const currentIndex = stops.findIndex(stop => stop.stop_id === currentStopId);
+            if (currentIndex === -1) return null;
+            
+            const remainingStops = stops.slice(currentIndex);
+            const futureStopIds = remainingStops.map(stop => stop.stop_id);
+            
+            // Check if there are any future City Loop stations
+            const hasFutureLoopStations = futureStopIds.some(id => loopStations.includes(id));
+            
+            if (hasFutureLoopStations) {
+                return "Stopping all stations via City Loop";
+            }
+            
+            return "Stopping all stations";
+        };
+
+        const showNoDeparturesMessage = (platformFilter) => {
+            // Clear the stations display
+            const stationsList = document.querySelector('.stations-list');
+            const existingColumns = stationsList.querySelectorAll('.stations-column');
+            existingColumns.forEach(col => col.remove());
+            
+            // Hide all departure info elements
+            if (departureTimeElement) departureTimeElement.style.display = 'none';
+            if (delayIndicatorElement) delayIndicatorElement.style.display = 'none';
+            if (durationElement) durationElement.style.display = 'none';
+            if (platformElement) platformElement.style.display = 'none';
+            if (routeInfoElement) routeInfoElement.textContent = '';
+            
+            // Show message in the next-stations div
+            const nextStationsDiv = document.querySelector('.next-stations');
+            if (nextStationsDiv) {
+                nextStationsDiv.innerHTML = '<div class="no-trains"><span class="network-dings">A</span><br>No trains are departing from<br>this platform</div>';
+            }
+
+            // Clear destination text
+            if (destinationElement) {
+                destinationElement.textContent = '';
+            }
+            
+            if (lastUpdatedElement) {
+                lastUpdatedElement.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+            }
+            // Still show station name and platform info
+            if (stationNameElement) {
+                stationNameElement.textContent = getStationName(currentStopId);
+            }
+
+            if (headerPlatformElement) {
+                headerPlatformElement.textContent = currentPlatform || '?';
+            }
+        };
+
+        const restoreNormalDisplay = () => {
+            // Restore all departure info elements
+            if (departureTimeElement) departureTimeElement.style.display = '';
+            if (delayIndicatorElement) delayIndicatorElement.style.display = '';
+            if (durationElement) durationElement.style.display = '';
+            if (platformElement) platformElement.style.display = '';
+            
+            // Restore destination styling
+            if (destinationElement) {
+                destinationElement.style.textAlign = '';
+                destinationElement.style.width = '';
+            }
+            // Restore next-stations div structure
+                const nextStationsDiv = document.querySelector('.next-stations');
+                if (nextStationsDiv) {
+                    nextStationsDiv.innerHTML = '<div class="stations-list"></div>';
+                }
+                
+                // Clear destination text in case it was modified
+                if (destinationElement) {
+                    destinationElement.textContent = '';
+                }
+        };
+
+        const populateStationDivs = (stops, currentStopId, finalStopId) => {
+            console.log('populateStationDivs called with:', stops, currentStopId, finalStopId);
+            
+            const stationsList = document.querySelector('.stations-list');
+            
+            // Don't touch last-updated, just clear station columns
+            const existingColumns = stationsList.querySelectorAll('.stations-column');
+            existingColumns.forEach(col => col.remove());
+            
+            if (!stops || stops.length === 0) {
+                console.log('No stops data');
+                return;
+            }
+            
+            const currentIndex = stops.findIndex(stop => stop.stop_id === currentStopId);
+            const stopsToShow = currentIndex >= 0 ? stops.slice(currentIndex) : stops;
+            
+            console.log('Stops to show:', stopsToShow.length);
+
+            const { columns: numColumns, distribution } = calculateColumnDistribution(stopsToShow.length);
+
+            // Create columns
+            for (let i = 0; i < numColumns; i++) {
+                const column = document.createElement('div');
+                column.className = 'stations-column route-color';
+                stationsList.appendChild(column);
+            }
+
+            const columns = stationsList.querySelectorAll('.stations-column');
+            console.log('Created columns:', columns.length, 'Distribution:', distribution);
+
+            // Distribute stations according to calculated distribution
+            let stationIndex = 0;
+            for (let colIndex = 0; colIndex < numColumns; colIndex++) {
+                const stationsInThisColumn = distribution[colIndex];
+                
+                for (let i = 0; i < stationsInThisColumn && stationIndex < stopsToShow.length; i++) {
+                    const stop = stopsToShow[stationIndex];
+                    const stationDiv = document.createElement('div');
+                    stationDiv.className = 'next-station route-color';
+                    
+                    if (stationIndex === 0) stationDiv.classList.add('current');
+                    if (stop.stop_id === finalStopId) stationDiv.classList.add('last-station');
+                    
+                    const stationText = document.createElement('span');
+                    stationText.className = 'station-text';
+                    stationText.textContent = getStationName(stop.stop_id);
+                    
+                    console.log(`Adding station ${stationIndex}: ${stationText.textContent} to column ${colIndex}`);
+                    
+                    stationDiv.appendChild(stationText);
+                    columns[colIndex].appendChild(stationDiv);
+                    
+                    stationIndex++;
+                }
+            }
+        };
+
+        const calculateDuration = (scheduledTime, estimatedTime) => {
+            const departureTime = new Date(estimatedTime || scheduledTime);
+            const now = new Date();
+            const diffMinutes = Math.floor((departureTime - now) / 60000);
+            
+            if (diffMinutes < 1) return "Now";
+            if (diffMinutes < 60) return `${diffMinutes} min`;
+            const hours = Math.floor(diffMinutes / 60);
+            const mins = diffMinutes % 60;
+            return `${hours}h ${mins}m`;
+        };
+
+        // --- settings toggle ---
+        const toggleSettings = () => {
+            const isVisible = settingsPanel.classList.toggle('visible');            
+            settingsButton.setAttribute('aria-expanded', isVisible);            
+            // Change the SVG color to indicate it's open/closed
+            const svgPath = settingsButton.querySelector('svg path:nth-child(1)');
+        };
+
+        const updateBoard = async () => {
+            try {
+                const response = await fetch(getDepartureApiUrl());
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        const errorData = await response.json().catch(() => ({}));
+                        showNoDeparturesMessage(currentPlatform);
+                        return;
+                    }
+                    throw new Error('API response failed');
+                }
+
+                const data = await response.json();
+                console.log('API Response:', data);
+
+                // Check if this is a bus replacement (platform_number: null indicates no actual train)
+                if (data.platform_number === null) {
+                    showNoDeparturesMessage(currentPlatform);
+                    return;
+                }
+
+                // Check if we got data but for wrong platform when platform is specified
+                if (currentPlatform && data.platform_number !== currentPlatform) {
+                    showNoDeparturesMessage(currentPlatform);
+                    return;
+                }
+
+                restoreNormalDisplay();
+
+                const { route_id, platform_number, scheduled_departure_utc, estimated_departure_utc, delay_minutes, final_stop_id, run_id } = data;
+                
+                const stops = await loadStoppingPattern(run_id);
+                if (stops) {
+                    populateStationDivs(stops, currentStopId, final_stop_id);
+                    
+                    // Try inbound analysis first, then outbound
+                    let routeInfo = analyzeInboundRoute(stops, currentStopId);
+                    if (!routeInfo) {
+                        routeInfo = analyzeOutboundRoute(stops, currentStopId);
+                    }
+                    
+                    if (routeInfoElement && routeInfo) {
+                        routeInfoElement.textContent = routeInfo;
+                    }
+                }
+                
+                const colors = routeColors[route_id];
+                
+                if (colors) {
+                    departureItem.style.setProperty('--route-bg-color', colors.background);
+                    departureItem.style.setProperty('--route-text-color', colors.text);
+                }
+
+                if (platformElement) platformElement.textContent = platform_number || '?';
+                if (headerPlatformElement) headerPlatformElement.textContent = platform_number || '?';
+                
+                const destinationName = getStationName(final_stop_id);
+                if (destinationElement) destinationElement.textContent = destinationName;
+                
+                if (stationNameElement) stationNameElement.textContent = getStationName(currentStopId);
+                
+                if (departureTimeElement) {
+                    let timeString = new Date(scheduled_departure_utc).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                    timeString = timeString.replace('AM', 'am').replace('PM', 'pm');
+                    departureTimeElement.textContent = timeString;
+                }
+                
+                if (delayIndicatorElement) {
+                    if (delay_minutes >= 2) {
+                        delayIndicatorElement.textContent = `+${delay_minutes}`;
+                    } else {
+                        delayIndicatorElement.textContent = '';
+                    }
+                }
+                
+                if (durationElement) {
+                    durationElement.textContent = calculateDuration(scheduled_departure_utc, estimated_departure_utc);
+                }
+                
+                if (lastUpdatedElement) {
+                    lastUpdatedElement.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                if (lastUpdatedElement) {
+                    lastUpdatedElement.textContent = 'Error loading data';
+                }
+            }
+        };
+        
+        const headerHeight = headerElement.scrollHeight;
+        stationBoardElement.style.setProperty('--header-height', `${headerHeight}px`);
+
+        settingsButton.addEventListener('click', toggleSettings);
+
+        loadStations().then(() => {
+            populateStationDropdown();
+            updatePlatformDropdown();
+            updateBoard();
+            setInterval(updateBoard, 20000);
+        });
+    });
+    </script>
