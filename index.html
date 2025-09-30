@@ -407,6 +407,30 @@
             font-size: 72px;
         }
 
+        /* Skipped station styling */
+        .next-station.skipped {
+            color: #D7D2CB;
+        }
+
+        .next-station.skipped .station-text {
+            color: #D7D2CB;
+        }
+
+        /* Triangle marker for skipped stations (replacing square) */
+        .next-station.skipped::before {
+            content: '';
+            position: absolute;
+            left: -3px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 10px solid #95979A;
+            opacity: 0.5;
+        }
+        
     </style>
 </head>
 <body>
@@ -474,7 +498,7 @@
         const settingsButton = document.getElementById('settingsButton');
         const settingsPanel = document.getElementById('settings-panel');
         
-        let currentStopId = 1127; // default
+        let currentStopId = 1180; // default
         let currentPlatform = "1"; // default platform 1
 
         const getDepartureApiUrl = () => {
@@ -512,6 +536,67 @@
             } catch (error) {
                 console.error('Failed to load stations.json:', error);
             }
+        };
+
+        let routeOrderData = null;
+
+        const loadRouteOrder = async () => {
+            try {
+                const response = await fetch('https://raw.githubusercontent.com/nymms/melbstations/main/route-order.json'); // Or your GitHub URL
+                const data = await response.json();
+                routeOrderData = data.routes;
+            } catch (error) {
+                console.error('Failed to load route-order.json:', error);
+            }
+        };
+
+        const getRouteSegment = (routeId, currentStopId, finalStopId) => {
+            if (!routeOrderData || !routeOrderData[routeId]) return null;
+            
+            const routeStops = routeOrderData[routeId].stops;
+            
+            // Find positions in the route order
+            const currentPos = routeStops.findIndex(s => s.stop_id === currentStopId);
+            const finalPos = routeStops.findIndex(s => s.stop_id === finalStopId);
+            
+            if (currentPos === -1 || finalPos === -1) return null;
+            
+            // Determine direction and extract segment
+            let segment;
+            if (currentPos < finalPos) {
+                // Outbound: forward through array
+                segment = routeStops.slice(currentPos, finalPos + 1);
+            } else {
+                // Inbound: reverse through array
+                segment = routeStops.slice(finalPos, currentPos + 1).reverse();
+            }
+            
+            return segment;
+        };
+
+        const detectExpressService = (routeSegment, actualStops) => {
+            if (!routeSegment || routeSegment.length === 0) return { isExpress: false, skipped: [] };
+            
+            const actualStopIds = actualStops.map(s => s.stop_id);
+            const skippedStations = [];
+            let consecutiveSkips = 0;
+            let maxConsecutiveSkips = 0;
+            
+            routeSegment.forEach(stop => {
+                if (!actualStopIds.includes(stop.stop_id)) {
+                    skippedStations.push(stop);
+                    consecutiveSkips++;
+                    maxConsecutiveSkips = Math.max(maxConsecutiveSkips, consecutiveSkips);
+                } else {
+                    consecutiveSkips = 0;
+                }
+            });
+            
+            return {
+                isExpress: maxConsecutiveSkips >= 2,
+                skipped: skippedStations,
+                singleSkip: skippedStations.length === 1 ? skippedStations[0] : null
+            };
         };
 
         const getStationName = (stopId) => {
@@ -651,7 +736,7 @@
             return "to City";
         };
 
-        const analyzeOutboundRoute = (stops, currentStopId) => {
+        const analyzeOutboundRoute = (stops, currentStopId, expressInfo) => {
             const loopStations = [1068, 1120, 1155]; // Flagstaff, Melbourne Central, Parliament
             
             const currentIndex = stops.findIndex(stop => stop.stop_id === currentStopId);
@@ -663,11 +748,21 @@
             // Check if there are any future City Loop stations
             const hasFutureLoopStations = futureStopIds.some(id => loopStations.includes(id));
             
-            if (hasFutureLoopStations) {
-                return "Stopping all stations via City Loop";
+            // Build route description based on express detection
+            let baseText = "Stopping all stations";
+            
+            if (expressInfo && expressInfo.isExpress) {
+                baseText = "Express service";
+            } else if (expressInfo && expressInfo.singleSkip) {
+                const skippedStationName = getStationName(expressInfo.singleSkip.stop_id);
+                baseText = `Stopping all stations except ${skippedStationName}`;
             }
             
-            return "Stopping all stations";
+            if (hasFutureLoopStations) {
+                return `${baseText} via City Loop`;
+            }
+            
+            return baseText;
         };
 
         const showNoDeparturesMessage = (platformFilter) => {
@@ -731,12 +826,12 @@
                 }
         };
 
-        const populateStationDivs = (stops, currentStopId, finalStopId) => {
-            console.log('populateStationDivs called with:', stops, currentStopId, finalStopId);
+        const populateStationDivs = (stops, currentStopId, finalStopId, routeId) => {
+            console.log('populateStationDivs called with:', stops, currentStopId, finalStopId, routeId);
             
             const stationsList = document.querySelector('.stations-list');
             
-            // Don't touch last-updated, just clear station columns
+            // Clear existing columns
             const existingColumns = stationsList.querySelectorAll('.stations-column');
             existingColumns.forEach(col => col.remove());
             
@@ -745,24 +840,80 @@
                 return;
             }
             
-            const currentIndex = stops.findIndex(stop => stop.stop_id === currentStopId);
-            const stopsToShow = currentIndex >= 0 ? stops.slice(currentIndex) : stops;
+            // Get the full route segment (all stations between current and final)
+            const routeSegment = getRouteSegment(routeId, currentStopId, finalStopId);
             
-            console.log('Stops to show:', stopsToShow.length);
-
-            const { columns: numColumns, distribution } = calculateColumnDistribution(stopsToShow.length);
-
+            if (!routeSegment) {
+                console.log('No route order data, showing actual stops only');
+                // Fall back to showing only actual stops
+                const currentIndex = stops.findIndex(stop => stop.stop_id === currentStopId);
+                const stopsToShow = currentIndex >= 0 ? stops.slice(currentIndex) : stops;
+                populateActualStopsOnly(stopsToShow, finalStopId);
+                return;
+            }
+            
+            // Detect express service
+            const expressInfo = detectExpressService(routeSegment, stops);
+            const actualStopIds = stops.map(s => s.stop_id);
+            
+            console.log('Express detection:', expressInfo);
+            console.log('Route segment length:', routeSegment.length);
+            
+            const { columns: numColumns, distribution } = calculateColumnDistribution(routeSegment.length);
+            
             // Create columns
             for (let i = 0; i < numColumns; i++) {
                 const column = document.createElement('div');
                 column.className = 'stations-column route-color';
                 stationsList.appendChild(column);
             }
-
+            
             const columns = stationsList.querySelectorAll('.stations-column');
             console.log('Created columns:', columns.length, 'Distribution:', distribution);
+            
+            // Populate all stations (stopped + skipped)
+            let stationIndex = 0;
+            for (let colIndex = 0; colIndex < numColumns; colIndex++) {
+                const stationsInThisColumn = distribution[colIndex];
+                
+                for (let i = 0; i < stationsInThisColumn && stationIndex < routeSegment.length; i++) {
+                    const routeStop = routeSegment[stationIndex];
+                    const isActualStop = actualStopIds.includes(routeStop.stop_id);
+                    
+                    const stationDiv = document.createElement('div');
+                    stationDiv.className = isActualStop ? 'next-station route-color' : 'next-station skipped route-color';
+                    
+                    if (stationIndex === 0) stationDiv.classList.add('current');
+                    if (routeStop.stop_id === finalStopId) stationDiv.classList.add('last-station');
+                    
+                    const stationText = document.createElement('span');
+                    stationText.className = 'station-text';
+                    stationText.textContent = getStationName(routeStop.stop_id);
+                    
+                    stationDiv.appendChild(stationText);
+                    columns[colIndex].appendChild(stationDiv);
+                    
+                    stationIndex++;
+                }
+            }
+            
+            // Return express info for route-info usage
+            return expressInfo;
+        };
 
-            // Distribute stations according to calculated distribution
+        // Fallback function for when no route order data available
+        const populateActualStopsOnly = (stopsToShow, finalStopId) => {
+            const stationsList = document.querySelector('.stations-list');
+            const { columns: numColumns, distribution } = calculateColumnDistribution(stopsToShow.length);
+            
+            for (let i = 0; i < numColumns; i++) {
+                const column = document.createElement('div');
+                column.className = 'stations-column route-color';
+                stationsList.appendChild(column);
+            }
+            
+            const columns = stationsList.querySelectorAll('.stations-column');
+            
             let stationIndex = 0;
             for (let colIndex = 0; colIndex < numColumns; colIndex++) {
                 const stationsInThisColumn = distribution[colIndex];
@@ -778,8 +929,6 @@
                     const stationText = document.createElement('span');
                     stationText.className = 'station-text';
                     stationText.textContent = getStationName(stop.stop_id);
-                    
-                    console.log(`Adding station ${stationIndex}: ${stationText.textContent} to column ${colIndex}`);
                     
                     stationDiv.appendChild(stationText);
                     columns[colIndex].appendChild(stationDiv);
@@ -843,12 +992,12 @@
                 
                 const stops = await loadStoppingPattern(run_id);
                 if (stops) {
-                    populateStationDivs(stops, currentStopId, final_stop_id);
+                    const expressInfo = populateStationDivs(stops, currentStopId, final_stop_id, route_id);
                     
                     // Try inbound analysis first, then outbound
                     let routeInfo = analyzeInboundRoute(stops, currentStopId);
                     if (!routeInfo) {
-                        routeInfo = analyzeOutboundRoute(stops, currentStopId);
+                        routeInfo = analyzeOutboundRoute(stops, currentStopId, expressInfo);
                     }
                     
                     if (routeInfoElement && routeInfo) {
@@ -906,7 +1055,7 @@
 
         settingsButton.addEventListener('click', toggleSettings);
 
-        loadStations().then(() => {
+        Promise.all([loadStations(), loadRouteOrder()]).then(() => {
             populateStationDropdown();
             updatePlatformDropdown();
             updateBoard();
