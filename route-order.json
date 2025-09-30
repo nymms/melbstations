@@ -160,7 +160,7 @@
     "7": {
       "line_name": "Glen Waverley",
       "stops": [
-      {"stop_id": 1162, "stop_name": "Richmond", "order": 1}
+      {"stop_id": 1162, "stop_name": "Richmond", "order": 1},
       {"stop_id": 1059, "stop_name": "East Richmond", "order": 2},
       {"stop_id": 1030, "stop_name": "Burnley", "order": 3},
       {"stop_id": 1094, "stop_name": "Heyington", "order": 4},
@@ -180,7 +180,7 @@
     "8": {
       "line_name": "Hurstbridge",
       "stops": [
-      {"stop_id": 1104, "stop_name": "Jolimont-MCG", "order": 1}
+      {"stop_id": 1104, "stop_name": "Jolimont-MCG", "order": 1},
       {"stop_id": 1207, "stop_name": "West Richmond", "order": 2},
       {"stop_id": 1145, "stop_name": "North Richmond", "order": 3},
       {"stop_id": 1043, "stop_name": "Collingwood", "order": 2},
