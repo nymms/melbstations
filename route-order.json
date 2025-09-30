@@ -52,7 +52,7 @@
     "3": {
       "line_name": "Craigieburn",
       "stops": [
-      {"stop_id": 1144, "stop_name": "North Melbourne", "order": 1}
+      {"stop_id": 1144, "stop_name": "North Melbourne", "order": 1},
       {"stop_id": 1108, "stop_name": "Kensington", "order": 2},
       {"stop_id": 1140, "stop_name": "Newmarket", "order": 3},
       {"stop_id": 1009, "stop_name": "Ascot Vale", "order": 4},
