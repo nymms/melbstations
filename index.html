@@ -420,15 +420,14 @@
         .next-station.skipped::before {
             content: '';
             position: absolute;
-            left: -3px;
+            left: -9px;
             top: 50%;
             transform: translateY(-50%);
             width: 0;
             height: 0;
             border-left: 6px solid transparent;
             border-right: 6px solid transparent;
-            border-top: 10px solid #95979A;
-            opacity: 0.5;
+            border-top: 10px solid var(--route-bg-color, #95979A);
         }
         
     </style>
@@ -498,8 +497,9 @@
         const settingsButton = document.getElementById('settingsButton');
         const settingsPanel = document.getElementById('settings-panel');
         
-        let currentStopId = 1180; // default
+        let currentStopId = 1127; // default
         let currentPlatform = "1"; // default platform 1
+        let currentRunId = null;
 
         const getDepartureApiUrl = () => {
             const baseUrl = `https://melbptboard-opt.onrender.com/api/next-departure?stop_id=${currentStopId}`;
@@ -841,25 +841,51 @@
             }
             
             // Get the full route segment (all stations between current and final)
-            const routeSegment = getRouteSegment(routeId, currentStopId, finalStopId);
+            let routeSegment = getRouteSegment(routeId, currentStopId, finalStopId);
+            let cityStops = [];
+            let suburbanStartIndex = 0;
             
+            // If current station not in route order (likely a city station), find first suburban station
             if (!routeSegment) {
-                console.log('No route order data, showing actual stops only');
-                // Fall back to showing only actual stops
+                console.log('Current station not in route order, searching for first suburban station');
+                
                 const currentIndex = stops.findIndex(stop => stop.stop_id === currentStopId);
-                const stopsToShow = currentIndex >= 0 ? stops.slice(currentIndex) : stops;
-                populateActualStopsOnly(stopsToShow, finalStopId);
-                return;
+                
+                // Find the first stop that IS in the route order
+                for (let i = currentIndex; i < stops.length; i++) {
+                    const testSegment = getRouteSegment(routeId, stops[i].stop_id, finalStopId);
+                    if (testSegment) {
+                        routeSegment = testSegment;
+                        suburbanStartIndex = i;
+                        // City stops are everything before the first suburban stop
+                        cityStops = stops.slice(currentIndex, i);
+                        console.log('Found suburban portion starting at:', stops[i].stop_name, 'with', cityStops.length, 'city stops');
+                        break;
+                    }
+                }
+                
+                if (!routeSegment) {
+                    console.log('No route order data found, showing actual stops only');
+                    const stopsToShow = currentIndex >= 0 ? stops.slice(currentIndex) : stops;
+                    populateActualStopsOnly(stopsToShow, finalStopId);
+                    return;
+                }
             }
             
-            // Detect express service
-            const expressInfo = detectExpressService(routeSegment, stops);
-            const actualStopIds = stops.map(s => s.stop_id);
+            // Get stops for suburban portion only (for express detection)
+            const suburbanStops = stops.slice(suburbanStartIndex);
+            
+            // Detect express service on suburban portion
+            const expressInfo = detectExpressService(routeSegment, suburbanStops);
+            const actualStopIds = suburbanStops.map(s => s.stop_id);
             
             console.log('Express detection:', expressInfo);
             console.log('Route segment length:', routeSegment.length);
+            console.log('City stops:', cityStops.length);
             
-            const { columns: numColumns, distribution } = calculateColumnDistribution(routeSegment.length);
+            // Calculate total stops to display (city + suburban route segment)
+            const totalStops = cityStops.length + routeSegment.length;
+            const { columns: numColumns, distribution } = calculateColumnDistribution(totalStops);
             
             // Create columns
             for (let i = 0; i < numColumns; i++) {
@@ -871,24 +897,43 @@
             const columns = stationsList.querySelectorAll('.stations-column');
             console.log('Created columns:', columns.length, 'Distribution:', distribution);
             
-            // Populate all stations (stopped + skipped)
+            // Populate all stations (city + suburban with skipped)
             let stationIndex = 0;
+            
             for (let colIndex = 0; colIndex < numColumns; colIndex++) {
                 const stationsInThisColumn = distribution[colIndex];
                 
-                for (let i = 0; i < stationsInThisColumn && stationIndex < routeSegment.length; i++) {
-                    const routeStop = routeSegment[stationIndex];
-                    const isActualStop = actualStopIds.includes(routeStop.stop_id);
+                for (let i = 0; i < stationsInThisColumn && stationIndex < totalStops; i++) {
+                    let stationDiv, stationText;
                     
-                    const stationDiv = document.createElement('div');
-                    stationDiv.className = isActualStop ? 'next-station route-color' : 'next-station skipped route-color';
-                    
-                    if (stationIndex === 0) stationDiv.classList.add('current');
-                    if (routeStop.stop_id === finalStopId) stationDiv.classList.add('last-station');
-                    
-                    const stationText = document.createElement('span');
-                    stationText.className = 'station-text';
-                    stationText.textContent = getStationName(routeStop.stop_id);
+                    // First, render city stops (if any)
+                    if (stationIndex < cityStops.length) {
+                        const cityStop = cityStops[stationIndex];
+                        stationDiv = document.createElement('div');
+                        stationDiv.className = 'next-station route-color';
+                        
+                        if (stationIndex === 0) stationDiv.classList.add('current');
+                        
+                        stationText = document.createElement('span');
+                        stationText.className = 'station-text';
+                        stationText.textContent = getStationName(cityStop.stop_id);
+                        
+                    } else {
+                        // Then render suburban stops (with skipped detection)
+                        const suburbanIndex = stationIndex - cityStops.length;
+                        const routeStop = routeSegment[suburbanIndex];
+                        const isActualStop = actualStopIds.includes(routeStop.stop_id);
+                        
+                        stationDiv = document.createElement('div');
+                        stationDiv.className = isActualStop ? 'next-station route-color' : 'next-station skipped route-color';
+                        
+                        if (stationIndex === 0) stationDiv.classList.add('current');
+                        if (routeStop.stop_id === finalStopId) stationDiv.classList.add('last-station');
+                        
+                        stationText = document.createElement('span');
+                        stationText.className = 'station-text';
+                        stationText.textContent = getStationName(routeStop.stop_id);
+                    }
                     
                     stationDiv.appendChild(stationText);
                     columns[colIndex].appendChild(stationDiv);
@@ -964,8 +1009,8 @@
                 
                 if (!response.ok) {
                     if (response.status === 404) {
-                        const errorData = await response.json().catch(() => ({}));
                         showNoDeparturesMessage(currentPlatform);
+                        currentRunId = null; // Reset when no departures
                         return;
                     }
                     throw new Error('API response failed');
@@ -974,52 +1019,65 @@
                 const data = await response.json();
                 console.log('API Response:', data);
 
-                // Check if this is a bus replacement (platform_number: null indicates no actual train)
                 if (data.platform_number === null) {
                     showNoDeparturesMessage(currentPlatform);
+                    currentRunId = null;
                     return;
                 }
 
-                // Check if we got data but for wrong platform when platform is specified
                 if (currentPlatform && data.platform_number !== currentPlatform) {
                     showNoDeparturesMessage(currentPlatform);
+                    currentRunId = null;
                     return;
                 }
-
-                restoreNormalDisplay();
 
                 const { route_id, platform_number, scheduled_departure_utc, estimated_departure_utc, delay_minutes, final_stop_id, run_id } = data;
                 
-                const stops = await loadStoppingPattern(run_id);
-                if (stops) {
-                    const expressInfo = populateStationDivs(stops, currentStopId, final_stop_id, route_id);
+                // Detect if this is a new train service
+                const isNewService = run_id !== currentRunId;
+                
+                if (isNewService) {
+                    console.log('New service detected, updating station list');
+                    currentRunId = run_id;
                     
-                    // Try inbound analysis first, then outbound
-                    let routeInfo = analyzeInboundRoute(stops, currentStopId);
-                    if (!routeInfo) {
-                        routeInfo = analyzeOutboundRoute(stops, currentStopId, expressInfo);
+                    // Update route colors for new service
+                    const colors = routeColors[route_id];
+                    if (colors) {
+                        departureItem.style.setProperty('--route-bg-color', colors.background);
+                        departureItem.style.setProperty('--route-text-color', colors.text);
                     }
                     
-                    if (routeInfoElement && routeInfo) {
-                        routeInfoElement.textContent = routeInfo;
+                    // Update platform and station name
+                    if (platformElement) platformElement.textContent = platform_number || '?';
+                    if (headerPlatformElement) headerPlatformElement.textContent = platform_number || '?';
+                    if (stationNameElement) stationNameElement.textContent = getStationName(currentStopId);
+                    
+                    const destinationName = getStationName(final_stop_id);
+                    if (destinationElement) destinationElement.textContent = destinationName;
+                    
+                    // Fetch and update stops for new service
+                    const stops = await loadStoppingPattern(run_id);
+                    
+                    const nextStationsDiv = document.querySelector('.next-stations');
+                    if (nextStationsDiv.querySelector('.no-trains')) {
+                        restoreNormalDisplay();
+                    }
+                    
+                    if (stops) {
+                        const expressInfo = populateStationDivs(stops, currentStopId, final_stop_id, route_id);
+                        
+                        let routeInfo = analyzeInboundRoute(stops, currentStopId);
+                        if (!routeInfo) {
+                            routeInfo = analyzeOutboundRoute(stops, currentStopId, expressInfo);
+                        }
+                        
+                        if (routeInfoElement && routeInfo) {
+                            routeInfoElement.textContent = routeInfo;
+                        }
                     }
                 }
                 
-                const colors = routeColors[route_id];
-                
-                if (colors) {
-                    departureItem.style.setProperty('--route-bg-color', colors.background);
-                    departureItem.style.setProperty('--route-text-color', colors.text);
-                }
-
-                if (platformElement) platformElement.textContent = platform_number || '?';
-                if (headerPlatformElement) headerPlatformElement.textContent = platform_number || '?';
-                
-                const destinationName = getStationName(final_stop_id);
-                if (destinationElement) destinationElement.textContent = destinationName;
-                
-                if (stationNameElement) stationNameElement.textContent = getStationName(currentStopId);
-                
+                // ALWAYS update these (they change even for same service)
                 if (departureTimeElement) {
                     let timeString = new Date(scheduled_departure_utc).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
                     timeString = timeString.replace('AM', 'am').replace('PM', 'pm');
@@ -1044,6 +1102,7 @@
 
             } catch (error) {
                 console.error('Error:', error);
+                currentRunId = null;
                 if (lastUpdatedElement) {
                     lastUpdatedElement.textContent = 'Error loading data';
                 }
