@@ -11,6 +11,30 @@
             box-sizing: border-box;
         }
         
+        @font-face {
+            font-family: 'Network Sans 2019';
+            src: url('https://raw.githubusercontent.com/nymms/melbstations/main/NETWORKSANS-2019-REGULAR.TTF') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Network Sans 2019';
+            src: url('https://raw.githubusercontent.com/nymms/melbstations/main/NETWORKSANS-2019-MEDIUM.TTF') format('truetype');
+            font-weight: 600;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'Network Sans 2019';
+            src: url('https://raw.githubusercontent.com/nymms/melbstations/main/NETWORKSANS-2019-BOLD.TTF') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+            font-display: swap;
+        }
+
         body {
             font-family: 'Network Sans 2019', Arial, sans-serif;
             background-color: #000;
@@ -393,13 +417,28 @@
 
         .no-trains {
             font-size: 42px;
+            font-weight: 600;
             text-align: center;
             color: #333434;
+            top: 50px;
         }
 
-        .next-stations:has(.no-trains) {
-          /* Your styles for .next-stations when .no-trains is inside it */
-          border: none;
+        /* train icon */
+        .no-trains:before {
+            text-align: center;
+            width: 180px;
+            left: 35%;
+            display: block;
+            position: relative;
+            content: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="matrix(0.240385,0,0,0.240385,-36.1594,-13.7553)"><path d="M282.232,285.192C285.688,285.192 288.568,282.312 288.568,278.856C288.568,275.4 285.688,272.52 282.232,272.52C278.776,272.52 275.896,275.4 275.896,278.856C275.896,282.312 278.776,285.192 282.232,285.192ZM299.224,285.192C302.68,285.192 305.272,282.312 305.272,278.856C305.272,275.4 302.68,272.52 299.224,272.52C295.768,272.52 292.888,275.4 292.888,278.856C292.888,282.312 295.768,285.192 299.224,285.192ZM359.704,285.192C363.16,285.192 366.04,282.312 366.04,278.856C366.04,275.4 363.16,272.52 359.704,272.52C356.248,272.52 353.368,275.4 353.368,278.856C353.368,282.312 356.248,285.192 359.704,285.192ZM376.408,285.192C380.152,285.192 382.744,282.312 382.744,278.856C382.744,275.4 380.152,272.52 376.408,272.52C372.952,272.52 370.36,275.4 370.36,278.856C370.36,282.312 372.952,285.192 376.408,285.192Z" style="fill-rule:nonzero;"/></g><g transform="matrix(0.240385,0,0,0.240385,-86.577,-13.7553)"><g transform="matrix(1,0,0,1,-29.12,0)"><path d="M628.656,305.928L508.272,305.928C497.904,305.928 489.264,297.576 489.264,287.208L489.264,286.92L496.176,191.592L496.176,191.88C496.176,181.512 504.816,172.872 515.184,172.872L621.456,172.872C632.112,172.872 640.464,181.512 640.464,191.88L640.464,191.592L647.664,286.92L647.664,287.208C647.664,297.576 639.024,305.928 628.656,305.928Z" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:8.32px;"/></g><g transform="matrix(1,0,0,1.02439,-29.8,-6.432)"><path d="M611,208.008C611,206.348 609.619,205 607.918,205L530.082,205C528.381,205 527,206.348 527,208.008L524,242.992C524,244.652 525.381,246 527.082,246L610.918,246C612.619,246 614,244.652 614,242.992L611,208.008Z" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:10.87px;stroke-linecap:round;stroke-miterlimit:1.5;"/></g><g transform="matrix(1,0,0,1,-29.12,0)"><path d="M568.464,203.568L568.464,245.568" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:5px;stroke-linecap:round;stroke-miterlimit:1.5;"/></g><g transform="matrix(1,0,0,1,159.539,5.01469)"><path d="M300,335L459,335" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:11px;stroke-linecap:round;stroke-miterlimit:1.5;"/></g><g transform="matrix(1,0,0,1,160.344,5.01469)"><path d="M314,316L444,316" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:5px;stroke-linecap:round;stroke-miterlimit:1.5;"/></g><g transform="matrix(1.34459,0,0,1,24.7651,5.01469)"><path d="M365,300.913L360,300.913C360,300.913 340.912,338.471 334.531,351.025C334.13,351.815 334.087,352.837 334.419,353.683C334.751,354.528 335.403,355.057 336.114,355.057L347.514,355.057C348.193,355.057 348.805,354.503 349.061,353.657C351.628,345.162 365,300.913 365,300.913Z" style="fill-rule:nonzero;"/></g><g transform="matrix(-1.34459,0,0,1,1053.7,5.01469)"><path d="M365,300.913L360,300.913C360,300.913 340.912,338.471 334.531,351.025C334.13,351.815 334.087,352.837 334.419,353.683C334.751,354.528 335.403,355.057 336.114,355.057L347.514,355.057C348.193,355.057 348.805,354.503 349.061,353.657C351.628,345.162 365,300.913 365,300.913Z" style="fill-rule:nonzero;"/></g></g><g transform="matrix(-2.67017,0,0,2.67017,100.916,10.1879)"><path d="M11.119,8.559C11.155,8.091 11.563,7.755 12.031,7.791C12.499,7.827 12.835,8.235 12.799,8.691C12.763,9.159 12.355,9.507 11.899,9.471C11.431,9.435 11.083,9.027 11.119,8.559Z" style="fill-rule:nonzero;"/></g><g transform="matrix(-2.67017,0,0,2.67017,100.916,10.1879)"><path d="M14.671,13.023C14.587,13.143 14.455,13.203 14.323,13.203C14.239,13.203 14.155,13.179 14.071,13.131L12.919,12.327C12.859,12.291 12.811,12.231 12.775,12.171L12.391,11.403L11.899,13.647L13.147,14.907C13.219,14.979 13.279,15.075 13.291,15.183L13.603,17.355C13.639,17.631 13.447,17.895 13.171,17.931L13.099,17.931C12.847,17.931 12.631,17.751 12.595,17.499L12.319,15.495L11.047,14.235L10.759,15.531C10.747,15.591 10.723,15.651 10.687,15.711L9.355,17.703C9.259,17.859 9.103,17.931 8.935,17.931C8.839,17.931 8.743,17.907 8.659,17.847C8.419,17.691 8.359,17.379 8.515,17.151L9.787,15.219L10.711,11.103L9.991,11.811L9.619,13.239C9.559,13.431 9.391,13.563 9.199,13.563C9.163,13.563 9.115,13.551 9.067,13.539C8.851,13.467 8.731,13.227 8.791,13.011L9.187,11.487C9.211,11.415 9.247,11.343 9.307,11.295L10.615,9.975C10.711,9.879 10.843,9.831 10.987,9.831L12.235,9.831C12.439,9.831 12.607,9.939 12.703,10.107L13.495,11.679L14.551,12.411C14.755,12.555 14.815,12.831 14.671,13.023Z" style="fill-rule:nonzero;"/></g><g transform="matrix(1.15158,0,0,1.15158,-3.80791,-4.41653)"><circle cx="46.367" cy="50.382" r="33.471" style="fill:none;stroke:rgb(207,32,47);stroke-width:1.3px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"/></g><path d="M23.427,25.305L75.868,81.789" style="fill:none;stroke:rgb(207,32,47);stroke-width:1.5px;stroke-linejoin:round;stroke-miterlimit:1.5;"/></svg>');
+        }
+
+        .departure-item:has(.no-trains) .next-stations {
+            border: none;
+        }
+
+        .departure-item:has(.no-trains) .departure-header {
+            border: none;
         }
 
         .network-dings {
@@ -420,16 +459,41 @@
         .next-station.skipped::before {
             content: '';
             position: absolute;
-            left: -9px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 0;
-            height: 0;
-            border-left: 6px solid transparent;
-            border-right: 6px solid transparent;
-            border-top: 10px solid var(--route-bg-color, #95979A);
+            left: -10px;
+            top: 97%;
+            transform: translate(0, -50%); /* Added transform for vertical centering */
+            width: 30px;
+            height: 30px;
+            background-color: white; 
+            /* Use the LARGER SVG (full shape) */
+            mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:white;stroke-width:8px;"/></svg>');
+            -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:white;stroke-width:8px;"/></svg>');
         }
-        
+
+        .next-station.skipped::after {
+            content: '';
+            /* Match the position and size of ::before */
+            position: absolute;
+            left: -10px;
+            top: 75%;
+            transform: translate(0, -50%);
+            width: 30px;
+            height: 30px;
+            /* This will be the FILL color (your required color) */
+            background-color: var(--route-bg-color, #95979A); 
+            /* Use the SMALLER SVG (the inner fill area) */
+            mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:black;stroke-width:12px;"/></svg>');
+            -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:black;stroke-width:12px;"/></svg>');
+        }
+
+        .next-station.skipped ~ .next-station.skipped:before {
+            content: none;
+        }
+
+        .next-station.skipped ~ .next-station.skipped:after {
+            content: none;
+        }
+
     </style>
 </head>
 <body>
@@ -778,10 +842,10 @@
             if (platformElement) platformElement.style.display = 'none';
             if (routeInfoElement) routeInfoElement.textContent = '';
             
-            // Show message in the next-stations div
-            const nextStationsDiv = document.querySelector('.next-stations');
+            // Show message in the route-info div
+            const nextStationsDiv = document.querySelector('.route-info');
             if (nextStationsDiv) {
-                nextStationsDiv.innerHTML = '<div class="no-trains"><span class="network-dings">A</span><br>No trains are departing from<br>this platform</div>';
+                nextStationsDiv.innerHTML = '<div class="no-trains">No trains are departing from<br>this platform</div>';
             }
 
             // Clear destination text
@@ -803,27 +867,30 @@
         };
 
         const restoreNormalDisplay = () => {
-            // Restore all departure info elements
+            // 1. Find the .route-info container
+            const routeInfoContainer = document.querySelector('.departure-item .route-info');
+
+            // 2. Reset the content of .route-info to its original state (containing only a span)
+            if (routeInfoContainer) {
+                routeInfoContainer.innerHTML = '<span></span>';
+            }
+
+            // 3. Clear the content of the *actual* .stations-list (which lives in the sibling .next-stations)
+            const stationsList = document.querySelector('.stations-list');
+            if (stationsList) {
+                stationsList.innerHTML = '';
+            }
+            
+            // Restore display properties for the next train data
             if (departureTimeElement) departureTimeElement.style.display = '';
             if (delayIndicatorElement) delayIndicatorElement.style.display = '';
             if (durationElement) durationElement.style.display = '';
             if (platformElement) platformElement.style.display = '';
             
-            // Restore destination styling
             if (destinationElement) {
                 destinationElement.style.textAlign = '';
                 destinationElement.style.width = '';
             }
-            // Restore next-stations div structure
-                const nextStationsDiv = document.querySelector('.next-stations');
-                if (nextStationsDiv) {
-                    nextStationsDiv.innerHTML = '<div class="stations-list"></div>';
-                }
-                
-                // Clear destination text in case it was modified
-                if (destinationElement) {
-                    destinationElement.textContent = '';
-                }
         };
 
         const populateStationDivs = (stops, currentStopId, finalStopId, routeId) => {
@@ -1058,7 +1125,7 @@
                     // Fetch and update stops for new service
                     const stops = await loadStoppingPattern(run_id);
                     
-                    const nextStationsDiv = document.querySelector('.next-stations');
+                    const nextStationsDiv = document.querySelector('.route-info');
                     if (nextStationsDiv.querySelector('.no-trains')) {
                         restoreNormalDisplay();
                     }
@@ -1071,8 +1138,12 @@
                             routeInfo = analyzeOutboundRoute(stops, currentStopId, expressInfo);
                         }
                         
-                        if (routeInfoElement && routeInfo) {
-                            routeInfoElement.textContent = routeInfo;
+                        // Find the element again (it's the <span> inside the .route-info container)
+                        const currentRouteInfoElement = document.querySelector('.route-info span');
+
+                        if (currentRouteInfoElement && routeInfo) {
+                            // Use the newly found, live element
+                            currentRouteInfoElement.textContent = routeInfo;
                         }
                     }
                 }
