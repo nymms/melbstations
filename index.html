@@ -3,496 +3,555 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="light.css" id="theme-link">
     <title>Melb PT Departure Board</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        @font-face {
-            font-family: 'Network Sans 2019';
-            src: url('https://raw.githubusercontent.com/nymms/melbstations/main/NETWORKSANS-2019-REGULAR.TTF') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-            font-display: swap;
-        }
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-        @font-face {
-            font-family: 'Network Sans 2019';
-            src: url('https://raw.githubusercontent.com/nymms/melbstations/main/NETWORKSANS-2019-MEDIUM.TTF') format('truetype');
-            font-weight: 600;
-            font-style: normal;
-            font-display: swap;
-        }
+    body {
+        background-color: #000000;
+        font-family: 'Network Sans 2019', Arial, sans-serif;
+    }
 
-        @font-face {
-            font-family: 'Network Sans 2019';
-            src: url('https://raw.githubusercontent.com/nymms/melbstations/main/NETWORKSANS-2019-BOLD.TTF') format('truetype');
-            font-weight: bold;
-            font-style: normal;
-            font-display: swap;
-        }
+    @font-face {
+        font-family: 'Network Sans 2019';
+        src: url('https://raw.githubusercontent.com/nymms/melbstations/main/NETWORKSANS-2019-REGULAR.TTF') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
 
-        body {
-            font-family: 'Network Sans 2019', Arial, sans-serif;
-            background-color: #000;
-            color: #333434;
-        }
+    @font-face {
+        font-family: 'Network Sans 2019';
+        src: url('https://raw.githubusercontent.com/nymms/melbstations/main/NETWORKSANS-2019-MEDIUM.TTF') format('truetype');
+        font-weight: 600;
+        font-style: normal;
+        font-display: swap;
+    }
 
-        /* The station board is now the hover zone for the header */
-        .station-board {
-            width: 800px;
-            margin: 0 auto;
-            position: relative;
-            left: 0;
-        }
+    @font-face {
+        font-family: 'Network Sans 2019';
+        src: url('https://raw.githubusercontent.com/nymms/melbstations/main/NETWORKSANS-2019-BOLD.TTF') format('truetype');
+        font-weight: bold;
+        font-style: normal;
+        font-display: swap;
+    }
 
-        /* Hidden checkbox to manage the 'pinned' state with pure CSS */
-        .hidden-pin-toggle {
-            display: none;
-        }
+    /* Station Board (Container) */
+    .station-board {
+        width: 1000px;
+        margin: 0 auto;
+        position: relative;
+        left: 0;
+    }
 
-        .pin-button {
-            position: absolute;
-            top: 150px;
-            left: -5px;
-            cursor: pointer;
-            z-index: 1002;
-            padding: 5px;
-            border-radius: 50%;
-            transition: background-color 0.2s ease;
-        }
+    /* Hidden Pin Toggle */
+    .hidden-pin-toggle {
+        display: none;
+    }
 
-        .pin-button svg {
-            width: 24px;
-            height: 24px;
-            fill: #333434; /* Light grey for the unpinned state */
-            transition: transform 0.3s ease-out;
-        }
+    /* Pin Button */
+    .pin-button {
+        position: absolute;
+        top: 150px;
+        left: -5px;
+        cursor: pointer;
+        z-index: 1002;
+        padding: 5px;
+        border-radius: 50%;
+        transition: background-color 0.2s ease;
+    }
 
-        .pin-button:hover svg {
-            fill: #707372;
-            transition: transform 0.3s ease-out;
-        }
+    .pin-button svg {
+        width: 24px;
+        height: 24px;
+        fill: #333434;
+        transition: transform 0.3s ease-out;
+    }
 
-        /* Rotate the pin and change its color when it's in the 'checked' state */
-        .hidden-pin-toggle:checked + .pin-button svg {
-            transform: rotate(45deg);
-            fill: #707372; /* Darker grey for the pinned state */
-        }
+    .pin-button:hover svg {
+        fill: #707372;
+        transition: transform 0.3s ease-out;
+    }
 
-        .settings {
-            /* Settings now use flex to place select boxes on a single line */
-            display: flex;
-            align-items: center;
-            gap: 10px; /* Space between the two select boxes */
-            padding: 12px;
-            /* Hidden by default, toggled via JS */
-            visibility: hidden;
-            opacity: 0;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-            position: relative;
-            left: 60px;
-            width: 100%;
-            z-index: 1000;
-        }
+    /* Pinned state */
+    .hidden-pin-toggle:checked + .pin-button svg {
+        transform: rotate(45deg);
+    }
 
-        /* Settings Auto-Hide: Visible ONLY when hovering over the board AND the .visible class is present. (Pin state is ignored.) */
-        .station-board:hover .settings.visible {
-            opacity: 1;
-            visibility: visible;
-        }
+    /* Settings Panel */
+    .settings {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px;
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        position: relative;
+        left: 60px;
+        width: 100%;
+        z-index: 1000;
+    }
 
-        .station-header {
-            width: 100%;
-            background-color: #fff;
-            padding: 12px;
-            text-align: center;
-            border-radius: 8px 8px 24px 24px;
-            box-shadow: inset 0 8px 8px -10px rgba(0, 0, 0, 0.8);
-            /* Start hidden above the viewport, accounting for its bottom margin */
-            margin-top: calc(-1 * (var(--header-height, 130px) + 12px));
-            transition: margin-top 0.5s ease-out;
-            position: relative;
-            z-index: 1001;
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-        }
+    /* Settings Auto-Hide */
+    .station-board:hover .settings.visible {
+        opacity: 1;
+        visibility: visible;
+    }
 
-        /* The header becomes visible when the pin is checked OR the board is hovered over and the pin is NOT checked */
-        .hidden-pin-toggle:checked ~ .station-header,
-        .station-board:hover .hidden-pin-toggle:not(:checked) ~ .station-header {
-            margin-top: 0; /* Pushes the header down into view */
-        }
-        
-        .station-name {
-            font-size: 56px;
-            font-weight: 600;
-            padding-top: 16px;
-            border-top: 16px solid #0072CE;
-            margin-bottom: 10px;
-            width: 100%;
-            height: 100px
-        }
+    .settings select {
+        padding: 2px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+    }
 
-        .departure-item {
-            --route-bg-color: #95979A;
-            --route-text-color: #000000;
+    /* Header */
+    .station-header {
+        width: 100%;
+        background-color: #fff; /* Common: White background for the header */
+        padding: 12px;
+        text-align: center;
+        border-radius: 8px 8px 24px 24px;
+        box-shadow: inset 0 8px 8px -10px rgba(0, 0, 0, 0.8);
+        margin-top: calc(-1 * (var(--header-height, 130px) + 12px));
+        transition: margin-top 0.5s ease-out;
+        position: relative;
+        z-index: 1001;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+    }
 
-            background-color: #fff;
-            margin: 0 auto 5px auto;
-            overflow: hidden;
-        }
-        
-        .departure-header {
-            padding: 15px 20px 0px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 16px solid var(--route-bg-color, #95979A);
-            height: 70px;
-        }
-        
-        .time-destination {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .departure-time {
-            font-size: 38px;
-            font-family: 'Network Sans 2019', Arial, sans-serif;
-            color: #000;
-        }
-        
-        .destination {
-            font-size: 42px;
-            font-family: 'Network Sans 2019', Arial, sans-serif;
-            font-weight: 600;
-            color: #000;
-        }
-        
-        .alert-icon {
-            width: 32px;
-            height: 32px;
-            background-color: #FE5000;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 900;
-            font-size: 24px;
-        }
-        
-        .time-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .delay-indicator {
-            color: #FE5000;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        
-        .duration {
-            background-color: #000;
-            color: #fff;
-            padding: 8px;
-            font-size: 28px;
-            font-weight: normal;
-            min-width: 100px;
-            text-align: center;
-            height: 50px;
-        }
+    /* Header visibility */
+    .hidden-pin-toggle:checked ~ .station-header,
+    .station-board:hover .hidden-pin-toggle:not(:checked) ~ .station-header {
+        margin-top: 0;
+    }
 
-        .route-info {
-            padding: 8px 20px 8px 20px;
-            font-size: 24px;
-            font-weight: 200;
-            color: #000;
-            justify-content: space-between;
-            align-items: center;
-            height: 50px;
-        }
-        
-        .departure-header .platform {
-            background-color: var(--route-bg-color, #95979A);
-            color: var(--route-text-color, #000000);
-            padding: 8px;
-            font-size: 28px;
-            font-weight: 900;
-            width: 40px;
-            height: 50px;
-            text-align: center;
-        }
+    .station-name {
+        font-size: 56px;
+        font-weight: 600;
+        color: #333434;
+        padding-top: 16px;
+        border-top: 16px solid #0072CE;
+        margin-bottom: 10px;
+        width: 100%;
+        height: 100px
+    }
 
-        .station-header .platform {
-            font-size: 90px;
-            font-weight: 500;
-            padding: 4px 8px;
-            border-radius: 0px;
-            margin-left: 10px;
-            flex-shrink: 0;
-            width: 100px;
-            height: 120px;
-            border-left: solid 2px #95979A;
+    /* Platform in Header */
+    .station-header .platform {
+        font-size: 90px;
+        font-weight: 500;
+        color: #333434;
+        padding: 4px 8px;
+        border-radius: 0px;
+        margin-left: 10px;
+        flex-shrink: 0;
+        width: 100px;
+        height: 120px;
+        border-left: solid 2px #95979A;
+    }
 
-        }
+    /* Departure Item (The main train block) */
+    .departure-item {
+        margin: 0 auto 0 auto;
+        overflow: hidden;
+    }
 
-        /* Route colors */
-        .route-color {color: #95979A;}
-        .route-bgcolor {background-color: #95979A; color: #000000;}
+    .departure-header {
+        padding: 15px 20px 0px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 16px solid var(--route-bg-color, #95979A); /* Dynamic route color */
+        height: 70px;
+    }
 
-        .next-stations {
-            padding: 0px 20px 15px 0px;
-            margin-left: 20px;
-            margin-right: 20px;
-            border-top: 3px solid #000;
-            min-height: 300px;
-        }
+    .time-destination {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
 
-        .stations-list {
-            display: flex;
-            flex-direction: row;
-            gap: 20px;
-            align-items: flex-start;
-        }
+    .departure-time {
+        font-size: 38px;
+        font-family: 'Network Sans 2019', Arial, sans-serif;
+        /* Color is different */
+    }
 
-        .stations-column {
-            display: flex;
-            flex-direction: column;
-            width: 33%;
-            padding-top: 12px;
-            background-repeat: no-repeat;
-            position: relative;
-        }
+    .destination {
+        font-size: 42px;
+        font-family: 'Network Sans 2019', Arial, sans-serif;
+        font-weight: 600;
+        /* Color is different */
+    }
 
-        .stations-column::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 25px;
-            height: 25px;
-            background-color: var(--route-bg-color, #95979A);
-            z-index: 1;
-            mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-            -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-        }
+    .alert-icon {
+        width: 32px;
+        height: 32px;
+        background-color: #FE5000;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 900;
+        font-size: 24px;
+    }
 
-        .stations-column:first-child::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 25px;
-            height: 25px;
-            background-color: var(--route-bg-color, #95979A);
-            z-index: 1;
-            mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="0" x2="11" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-            -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="0" x2="11" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-        }
+    .time-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
 
-        .stations-column:first-child {
-            padding-top: 8px;
-        }
+    .delay-indicator {
+        color: #FE5000; /* Common: Orange/Red for delay */
+        font-size: 28px;
+        font-weight: bold;
+    }
 
-        .next-station {
-            color: #000;
-            font-size: 22px;
-            font-weight: normal;
-            padding-left: 20px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            border-left: 6px solid var(--route-bg-color, #95979A);
-        }
+    .duration {
+        padding: 8px;
+        font-size: 28px;
+        font-weight: normal;
+        min-width: 100px;
+        text-align: center;
+        height: 50px;
+        /* Background and text color are inverted */
+    }
 
-        .next-station::before {
-            content: '◼︎';
-            font-weight: 900;
-            font-size: 12px;
-            position: absolute;
-            left: -2px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 16px;
-            height: 16px;
-            color: var(--route-bg-color, #95979A);
-        }
+    .route-info {
+        padding: 8px 20px 8px 20px;
+        font-size: 24px;
+        font-weight: 200;
+        /* Color is different */
+        justify-content: space-between;
+        align-items: center;
+        height: 50px;
+    }
 
-        .next-station.current {
-            color: #000;
-            border-left: 6px solid var(--route-bg-color, #95979A);
-        }
+    /* Platform in Departure Item */
+    .departure-header .platform {
+        background-color: var(--route-bg-color, #95979A);
+        color: var(--route-text-color, #000000);
+        padding: 8px;
+        font-size: 28px;
+        font-weight: 900;
+        width: 40px;
+        height: 50px;
+        text-align: center;
+    }
 
-        .next-station.current .station-text {
-            padding: 2px 4px;
-            background-color: var(--route-bg-color, #95979A);
-            color: var(--route-text-color, #95979A);
-        }
+    /* Route Colors (Defaults) */
+    .route-color {color: #95979A;}
+    .route-bgcolor {background-color: #95979A; color: #000000;}
 
-        .next-station.last-station {
-            border-left: none !important;
-            padding-left: 25px;
-        }
+    /* Next Stations Display */
+    .next-stations {
+        padding: 0px 20px 15px 0px;
+        margin-left: 20px;
+        margin-right: 20px;
+        /* border-top color is different */
+        min-height: 300px;
+    }
 
-        .next-station.last-station::after {
-            display: none !important;
-        }
+    .stations-list {
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+        align-items: flex-start;
+    }
 
-        /* terminating station T symbol */
-        .next-station.last-station::before {
-            content: '';
-            display: inline-block;
-            position: absolute;
-            left: -10px;
-            top: 8px;
-            width: 25px;
-            height: 25px;
-            background-color: var(--route-bg-color, #95979A);
-            mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="20" y1="75" x2="80" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="50" y1="0" x2="50" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-            -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="20" y1="75" x2="80" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="50" y1="0" x2="50" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-        }
+    .stations-column {
+        display: flex;
+        flex-direction: column;
+        width: 33%;
+        padding-top: 12px;
+        background-repeat: no-repeat;
+        position: relative;
+    }
 
-        /* station route continuation dashes */
-        .stations-column .next-station:last-child:not(.last-station)::after {
-            content: '';
-            position: absolute;
-            left: -6px;
-            top: 41px;
-            transform: translateY(-50%);
-            width: 25px;
-            height: 25px;
-            background-color: var(--route-bg-color, #95979A);
-            mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-            -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-        }
+    /* SVG mask for route line (start of column) */
+    .stations-column::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 25px;
+        height: 25px;
+        background-color: var(--route-bg-color, #95979A);
+        z-index: 1;
+        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+    }
 
-        .last-updated {
-            font-size: 8px;
-            padding: 2px;
-            color: #d3d3d3;
-        }
+    /* SVG mask for route line (first column special case) */
+    .stations-column:first-child::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 25px;
+        height: 25px;
+        background-color: var(--route-bg-color, #95979A);
+        z-index: 1;
+        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="0" x2="11" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="0" x2="11" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+    }
 
-        #settingsButton {
-            background: none;
-            border: none;
-            cursor: pointer;
-            outline: none;
-            display: inline-flex;
-            align-items: center;
-            position: absolute; /* Position button within the header/board */
-            left: 27px; /* Aligned to the right */
-            top: 150px; /* Pushed down slightly */
-            z-index: 1003;
-        }
+    .stations-column:first-child {
+        padding-top: 8px;
+    }
 
-        #settingsButton svg {
-            margin: 5px; 
-            width: 20px;
-            height: 20px;
-            display: block; 
-            fill: #ededed; /* Initial color when hidden (light gray) */
-        }
+    .next-station {
+        /* Color is implicitly overridden by .station-text anyway */
+        font-size: 22px;
+        font-weight: normal;
+        padding-left: 20px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        border-left: 6px solid var(--route-bg-color, #95979A);
+    }
 
-        #settingsButton:hover #gearOutline {
-            fill: #707372; 
-        } 
-        #gearOutline {
-            transition: fill 0.3s ease;
-        }
+    /* Station marker (square) */
+    .next-station::before {
+        content: '◼︎';
+        font-weight: 900;
+        font-size: 12px;
+        position: absolute;
+        left: -2px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 16px;
+        height: 16px;
+        color: var(--route-bg-color, #95979A);
+    }
 
-        .settings select {
-            padding: 2px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-        }
+    .next-station.current {
+        /* Color is implicitly overridden by .station-text anyway */
+        border-left: 6px solid var(--route-bg-color, #95979A);
+    }
 
-        .no-trains {
-            font-size: 42px;
-            font-weight: 600;
-            text-align: center;
-            color: #333434;
-            top: 50px;
-        }
+    .next-station.current .station-text {
+        padding: 2px 4px;
+        background-color: var(--route-bg-color, #95979A);
+        color: var(--route-text-color, #95979A);
+    }
 
-        /* train icon */
-        .no-trains:before {
-            text-align: center;
-            width: 180px;
-            left: 35%;
-            display: block;
-            position: relative;
-            content: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="matrix(0.240385,0,0,0.240385,-36.1594,-13.7553)"><path d="M282.232,285.192C285.688,285.192 288.568,282.312 288.568,278.856C288.568,275.4 285.688,272.52 282.232,272.52C278.776,272.52 275.896,275.4 275.896,278.856C275.896,282.312 278.776,285.192 282.232,285.192ZM299.224,285.192C302.68,285.192 305.272,282.312 305.272,278.856C305.272,275.4 302.68,272.52 299.224,272.52C295.768,272.52 292.888,275.4 292.888,278.856C292.888,282.312 295.768,285.192 299.224,285.192ZM359.704,285.192C363.16,285.192 366.04,282.312 366.04,278.856C366.04,275.4 363.16,272.52 359.704,272.52C356.248,272.52 353.368,275.4 353.368,278.856C353.368,282.312 356.248,285.192 359.704,285.192ZM376.408,285.192C380.152,285.192 382.744,282.312 382.744,278.856C382.744,275.4 380.152,272.52 376.408,272.52C372.952,272.52 370.36,275.4 370.36,278.856C370.36,282.312 372.952,285.192 376.408,285.192Z" style="fill-rule:nonzero;"/></g><g transform="matrix(0.240385,0,0,0.240385,-86.577,-13.7553)"><g transform="matrix(1,0,0,1,-29.12,0)"><path d="M628.656,305.928L508.272,305.928C497.904,305.928 489.264,297.576 489.264,287.208L489.264,286.92L496.176,191.592L496.176,191.88C496.176,181.512 504.816,172.872 515.184,172.872L621.456,172.872C632.112,172.872 640.464,181.512 640.464,191.88L640.464,191.592L647.664,286.92L647.664,287.208C647.664,297.576 639.024,305.928 628.656,305.928Z" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:8.32px;"/></g><g transform="matrix(1,0,0,1.02439,-29.8,-6.432)"><path d="M611,208.008C611,206.348 609.619,205 607.918,205L530.082,205C528.381,205 527,206.348 527,208.008L524,242.992C524,244.652 525.381,246 527.082,246L610.918,246C612.619,246 614,244.652 614,242.992L611,208.008Z" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:10.87px;stroke-linecap:round;stroke-miterlimit:1.5;"/></g><g transform="matrix(1,0,0,1,-29.12,0)"><path d="M568.464,203.568L568.464,245.568" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:5px;stroke-linecap:round;stroke-miterlimit:1.5;"/></g><g transform="matrix(1,0,0,1,159.539,5.01469)"><path d="M300,335L459,335" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:11px;stroke-linecap:round;stroke-miterlimit:1.5;"/></g><g transform="matrix(1,0,0,1,160.344,5.01469)"><path d="M314,316L444,316" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:5px;stroke-linecap:round;stroke-miterlimit:1.5;"/></g><g transform="matrix(1.34459,0,0,1,24.7651,5.01469)"><path d="M365,300.913L360,300.913C360,300.913 340.912,338.471 334.531,351.025C334.13,351.815 334.087,352.837 334.419,353.683C334.751,354.528 335.403,355.057 336.114,355.057L347.514,355.057C348.193,355.057 348.805,354.503 349.061,353.657C351.628,345.162 365,300.913 365,300.913Z" style="fill-rule:nonzero;"/></g><g transform="matrix(-1.34459,0,0,1,1053.7,5.01469)"><path d="M365,300.913L360,300.913C360,300.913 340.912,338.471 334.531,351.025C334.13,351.815 334.087,352.837 334.419,353.683C334.751,354.528 335.403,355.057 336.114,355.057L347.514,355.057C348.193,355.057 348.805,354.503 349.061,353.657C351.628,345.162 365,300.913 365,300.913Z" style="fill-rule:nonzero;"/></g></g><g transform="matrix(-2.67017,0,0,2.67017,100.916,10.1879)"><path d="M11.119,8.559C11.155,8.091 11.563,7.755 12.031,7.791C12.499,7.827 12.835,8.235 12.799,8.691C12.763,9.159 12.355,9.507 11.899,9.471C11.431,9.435 11.083,9.027 11.119,8.559Z" style="fill-rule:nonzero;"/></g><g transform="matrix(-2.67017,0,0,2.67017,100.916,10.1879)"><path d="M14.671,13.023C14.587,13.143 14.455,13.203 14.323,13.203C14.239,13.203 14.155,13.179 14.071,13.131L12.919,12.327C12.859,12.291 12.811,12.231 12.775,12.171L12.391,11.403L11.899,13.647L13.147,14.907C13.219,14.979 13.279,15.075 13.291,15.183L13.603,17.355C13.639,17.631 13.447,17.895 13.171,17.931L13.099,17.931C12.847,17.931 12.631,17.751 12.595,17.499L12.319,15.495L11.047,14.235L10.759,15.531C10.747,15.591 10.723,15.651 10.687,15.711L9.355,17.703C9.259,17.859 9.103,17.931 8.935,17.931C8.839,17.931 8.743,17.907 8.659,17.847C8.419,17.691 8.359,17.379 8.515,17.151L9.787,15.219L10.711,11.103L9.991,11.811L9.619,13.239C9.559,13.431 9.391,13.563 9.199,13.563C9.163,13.563 9.115,13.551 9.067,13.539C8.851,13.467 8.731,13.227 8.791,13.011L9.187,11.487C9.211,11.415 9.247,11.343 9.307,11.295L10.615,9.975C10.711,9.879 10.843,9.831 10.987,9.831L12.235,9.831C12.439,9.831 12.607,9.939 12.703,10.107L13.495,11.679L14.551,12.411C14.755,12.555 14.815,12.831 14.671,13.023Z" style="fill-rule:nonzero;"/></g><g transform="matrix(1.15158,0,0,1.15158,-3.80791,-4.41653)"><circle cx="46.367" cy="50.382" r="33.471" style="fill:none;stroke:rgb(207,32,47);stroke-width:1.3px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"/></g><path d="M23.427,25.305L75.868,81.789" style="fill:none;stroke:rgb(207,32,47);stroke-width:1.5px;stroke-linejoin:round;stroke-miterlimit:1.5;"/></svg>');
-        }
+    .next-station.last-station {
+        border-left: none !important;
+        padding-left: 25px;
+    }
 
-        .departure-item:has(.no-trains) .next-stations {
-            border: none;
-        }
+    .next-station.last-station::after {
+        display: none !important;
+    }
 
-        .departure-item:has(.no-trains) .departure-header {
-            border: none;
-        }
+    /* terminating station T symbol */
+    .next-station.last-station::before {
+        content: '';
+        display: inline-block;
+        position: absolute;
+        left: -10px;
+        top: 8px;
+        width: 25px;
+        height: 25px;
+        background-color: var(--route-bg-color, #95979A);
+        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="20" y1="75" x2="80" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="50" y1="0" x2="50" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="20" y1="75" x2="80" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="50" y1="0" x2="50" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+    }
 
-        .network-dings {
-            font-family: 'Network-Dings-2019';
-            font-size: 72px;
-        }
+    /* station route continuation dashes */
+    .stations-column .next-station:last-child:not(.last-station)::after {
+        content: '';
+        position: absolute;
+        left: -6px;
+        top: 41px;
+        transform: translateY(-50%);
+        width: 25px;
+        height: 25px;
+        background-color: var(--route-bg-color, #95979A);
+        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+    }
 
-        /* Skipped station styling */
-        .next-station.skipped {
-            color: #D7D2CB;
-        }
+    .last-updated {
+        font-size: 8px;
+        padding: 2px;
+        /* Color is different */
+    }
 
-        .next-station.skipped .station-text {
-            color: #D7D2CB;
-        }
+    /* Settings Button */
+    #settingsButton {
+        background: none;
+        border: none;
+        cursor: pointer;
+        outline: none;
+        display: inline-flex;
+        align-items: center;
+        position: absolute;
+        left: 27px;
+        top: 150px;
+        z-index: 1003;
+    }
 
-        /* Triangle marker for skipped stations (replacing square) */
-        .next-station.skipped::before {
-            content: '';
-            position: absolute;
-            left: -10px;
-            top: 97%;
-            transform: translate(0, -50%); /* Added transform for vertical centering */
-            width: 30px;
-            height: 30px;
-            background-color: white; 
-            /* Use the LARGER SVG (full shape) */
-            mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:white;stroke-width:8px;"/></svg>');
-            -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:white;stroke-width:8px;"/></svg>');
-        }
+    #settingsButton svg {
+        margin: 5px;
+        width: 20px;
+        height: 20px;
+        display: block;
+        /* Fill color is different */
+    }
 
-        .next-station.skipped::after {
-            content: '';
-            /* Match the position and size of ::before */
-            position: absolute;
-            left: -10px;
-            top: 75%;
-            transform: translate(0, -50%);
-            width: 30px;
-            height: 30px;
-            /* This will be the FILL color (your required color) */
-            background-color: var(--route-bg-color, #95979A); 
-            /* Use the SMALLER SVG (the inner fill area) */
-            mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:black;stroke-width:12px;"/></svg>');
-            -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:black;stroke-width:12px;"/></svg>');
-        }
+    #settingsButton:hover #gearOutline {
+        fill: #707372;
+    }
 
-        .next-station.skipped ~ .next-station.skipped:before {
-            content: none;
-        }
+    #gearOutline {
+        transition: fill 0.3s ease;
+    }
 
-        .next-station.skipped ~ .next-station.skipped:after {
-            content: none;
-        }
+    /* No Trains Message */
+    .no-trains {
+        font-size: 42px;
+        font-weight: 600;
+        text-align: center;
+        /* Color is different */
+        top: 50px;
+    }
+
+    /* Train Icon for No Trains Message (using data URI) */
+    .no-trains:before {
+        text-align: center;
+        width: 180px;
+        left: 35%;
+        display: block;
+        position: relative;
+        content: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="matrix(0.240385,0,0,0.240385,-36.1594,-13.7553)"><path d="M282.232,285.192C285.688,285.192 288.568,282.312 288.568,278.856C288.568,275.4 285.688,272.52 282.232,272.52C278.776,272.52 275.896,275.4 275.896,278.856C275.896,282.312 278.776,285.192 282.232,285.192ZM299.224,285.192C302.68,285.192 305.272,282.312 305.272,278.856C305.272,275.4 302.68,272.52 299.224,272.52C295.768,272.52 292.888,275.4 292.888,278.856C292.888,282.312 295.768,285.192 299.224,285.192ZM359.704,285.192C363.16,285.192 366.04,282.312 366.04,278.856C366.04,275.4 363.16,272.52 359.704,272.52C356.248,272.52 353.368,275.4 353.368,278.856C353.368,282.312 356.248,285.192 359.704,285.192ZM376.408,285.192C380.152,285.192 382.744,282.312 382.744,278.856C382.744,275.4 380.152,272.52 376.408,272.52C372.952,272.52 370.36,275.4 370.36,278.856C370.36,282.312 372.952,285.192 376.408,285.192Z" style="fill-rule:nonzero;"/></g><g transform="matrix(0.240385,0,0,0.240385,-86.577,-13.7553)"><g transform="matrix(1,0,0,1,-29.12,0)"><path d="M628.656,305.928L508.272,305.928C497.904,305.928 489.264,297.576 489.264,287.208L489.264,286.92L496.176,191.592L496.176,191.88C496.176,181.512 504.816,172.872 515.184,172.872L621.456,172.872C632.112,172.872 640.464,181.512 640.464,191.88L640.464,191.592L647.664,286.92L647.664,287.208C647.664,297.576 639.024,305.928 628.656,305.928Z" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:8.32px;"/></g><g transform="matrix(1,0,0,1.02439,-29.8,-6.432)"><path d="M611,208.008C611,206.348 609.619,205 607.918,205L530.082,205C528.381,205 527,206.348 527,208.008L524,242.992C524,244.652 525.381,246 527.082,246L610.918,246C612.619,246 614,244.652 614,242.992L611,208.008Z" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:10.87px;stroke-linecap:round;stroke-miterlimit:1.5;"/></g><g transform="matrix(1,0,0,1,-29.12,0)"><path d="M568.464,203.568L568.464,245.568" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:5px;stroke-linecap:round;stroke-miterlimit:1.5;"/></g><g transform="matrix(1,0,0,1,159.539,5.01469)"><path d="M300,335L459,335" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:11px;stroke-linecap:round;stroke-miterlimit:1.5;"/></g><g transform="matrix(1,0,0,1,160.344,5.01469)"><path d="M314,316L444,316" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:5px;stroke-linecap:round;stroke-miterlimit:1.5;"/></g><g transform="matrix(1.34459,0,0,1,24.7651,5.01469)"><path d="M365,300.913L360,300.913C360,300.913 340.912,338.471 334.531,351.025C334.13,351.815 334.087,352.837 334.419,353.683C334.751,354.528 335.403,355.057 336.114,355.057L347.514,355.057C348.193,355.057 348.805,354.503 349.061,353.657C351.628,345.162 365,300.913 365,300.913Z" style="fill-rule:nonzero;"/></g><g transform="matrix(-1.34459,0,0,1,1053.7,5.01469)"><path d="M365,300.913L360,300.913C360,300.913 340.912,338.471 334.531,351.025C334.13,351.815 334.087,352.837 334.419,353.683C334.751,354.528 335.403,355.057 336.114,355.057L347.514,355.057C348.193,355.057 348.805,354.503 349.061,353.657C351.628,345.162 365,300.913 365,300.913Z" style="fill-rule:nonzero;"/></g></g><g transform="matrix(-2.67017,0,0,2.67017,100.916,10.1879)"><path d="M11.119,8.559C11.155,8.091 11.563,7.755 12.031,7.791C12.499,7.827 12.835,8.235 12.799,8.691C12.763,9.159 12.355,9.507 11.899,9.471C11.431,9.435 11.083,9.027 11.119,8.559Z" style="fill-rule:nonzero;"/></g><g transform="matrix(-2.67017,0,0,2.67017,100.916,10.1879)"><path d="M14.671,13.023C14.587,13.143 14.455,13.203 14.323,13.203C14.239,13.203 14.155,13.179 14.071,13.131L12.919,12.327C12.859,12.291 12.811,12.231 12.775,12.171L12.391,11.403L11.899,13.647L13.147,14.907C13.219,14.979 13.279,15.075 13.291,15.183L13.603,17.355C13.639,17.631 13.447,17.895 13.171,17.931L13.099,17.931C12.847,17.931 12.631,17.751 12.595,17.499L12.319,15.495L11.047,14.235L10.759,15.531C10.747,15.591 10.723,15.651 10.687,15.711L9.355,17.703C9.259,17.859 9.103,17.931 8.935,17.931C8.839,17.931 8.743,17.907 8.659,17.847C8.419,17.691 8.359,17.379 8.515,17.151L9.787,15.219L10.711,11.103L9.991,11.811L9.619,13.239C9.559,13.431 9.391,13.563 9.199,13.563C9.163,13.563 9.115,13.551 9.067,13.539C8.851,13.467 8.731,13.227 8.791,13.011L9.187,11.487C9.211,11.415 9.247,11.343 9.307,11.295L10.615,9.975C10.711,9.879 10.843,9.831 10.987,9.831L12.235,9.831C12.439,9.831 12.607,9.939 12.703,10.107L13.495,11.679L14.551,12.411C14.755,12.555 14.815,12.831 14.671,13.023Z" style="fill-rule:nonzero;"/></g><g transform="matrix(1.15158,0,0,1.15158,-3.80791,-4.41653)"><circle cx="46.367" cy="50.382" r="33.471" style="fill:none;stroke:rgb(207,32,47);stroke-width:1.3px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"/></g><path d="M23.427,25.305L75.868,81.789" style="fill:none;stroke:rgb(207,32,47);stroke-width:1.5px;stroke-linejoin:round;stroke-miterlimit:1.5;"/></g><path d="M23.427,25.305L75.868,81.789" style="fill:none;stroke:rgb(207,32,47);stroke-width:1.5px;stroke-linejoin:round;stroke-miterlimit:1.5;"/></svg>');
+    }
+
+    .departure-item:has(.no-trains) .next-stations {
+        border: none;
+    }
+
+    .departure-item:has(.no-trains) .departure-header {
+        border: none;
+    }
+
+    /* Triangle marker for skipped stations - Outer (larger, background-color different) */
+    .next-station.skipped::before {
+        content: '';
+        position: absolute;
+        left: -10px;
+        top: 97%;
+        transform: translate(0, -50%);
+        width: 30px;
+        height: 30px;
+        /* Background color is different */
+        /* SVG Mask for the outer shape */
+        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:white;stroke-width:8px;"/></svg>');
+        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:white;stroke-width:8px;"/></svg>');
+    }
+
+    /* Triangle marker for skipped stations - Inner (smaller) */
+    .next-station.skipped::after {
+        content: '';
+        position: absolute;
+        left: -10px;
+        top: 75%;
+        transform: translate(0, -50%);
+        width: 30px;
+        height: 30px;
+        background-color: var(--route-bg-color, #95979A); /* Route color fill (same) */
+        /* SVG Mask for the inner fill area (same) */
+        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:black;stroke-width:12px;"/></svg>');
+        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:black;stroke-width:12px;"/></svg>');
+    }
+
+    .next-station.skipped ~ .next-station.skipped:before {
+        content: none;
+    }
+
+    .next-station.skipped ~ .next-station.skipped:after {
+        content: none;
+    }
+
+    .delay-indicator.future {
+        font-size: 16px;
+    }
+
+    .route-info.future {
+        padding: 0px;
+        font-size: 18px;
+        justify-content: normal;
+        align-items: normal;
+        height: initial;
+    }
+
+    .departure-item.future {
+        margin: 4px 0 4px 15px;
+        position: relative;
+        left: 0px;
+    }
+
+    .departure-header.future {
+        padding: 5px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        height: initial;
+    }
+            
+    .departure-time.future {
+        font-size: 24px;
+    }
+
+    .destination.future {
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    .duration.future {
+        font-size: 21px;
+        min-width: 80px;
+        height: 30px;
+        padding: 2px;
+    }
+
+    .departure-header.future {
+        border-top: none;
+        border-left: 6px solid var(--route-bg-color, #95979A);
+    }
+
+    .time-destination.future {
+        gap: 10px;
+    }
+
+    .clock {
+        font-size: 40px;
+        font-variant-numeric: tabular-nums;
+        width: 25%;
+        height: 106px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 3px 5px;
+    }
+
+    .otherdepartures {
+        display: flex;
+    }
+
+    .departurestack {
+        width: 75%;
+    }
 
     </style>
 </head>
@@ -523,26 +582,63 @@
             <select id="platformSelect" style="width:40px;">
             <option value="">All Platforms</option>
             </select>
+            <select id="cssSelect">
+            <option value="light.css">light</option>
+            <option value="dark.css">dark</option>
+            </select>
         </div>
-        <div class="departure-item" style="display: block;">
-            <div class="departure-header">
-                <div class="time-destination">
-                    <span class="departure-time"></span>
-                    <span class="destination"></span>
+        <div class="departure-container">
+            <div class="departure-item" style="display: block;">
+               <div class="departure-header">
+                   <div class="time-destination">
+                     <span class="departure-time"></span>
+                     <span class="destination"></span>
+                    </div>
+                    <div class="time-info">
+                     <div class="delay-indicator"></div>
+                     <div class="duration"></div>
+                    </div>
                 </div>
-                <div class="time-info">
-                    <div class="delay-indicator"></div>
-                    <div class="duration"></div>
+                <div class="route-info"><span></span></div>
+                <div class="next-stations">
+                 <div class="stations-list"></div>
                 </div>
             </div>
-            <div class="route-info"><span></span></div>
-            <div class="next-stations">
-                <div class="stations-list">
+            <div class="otherdepartures">
+                <div class="departurestack">
+                    <div class="departure-item future">
+                        <div class="departure-header future">
+                            <div class="time-destination future">
+                                <span class="departure-time future"></span>
+                                <span class="destination future"></span>
+                                <span class="route-info future"></span>
+                            </div>
+                            <div class="time-info future">
+                                <div class="delay-indicator future"></div>
+                                <div class="duration future"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="departure-item future">
+                        <div class="departure-header future">
+                            <div class="time-destination future">
+                                <span class="departure-time future"></span>
+                                <span class="destination future"></span>
+                                <span class="route-info future"></span>
+                            </div>
+                            <div class="time-info future">
+                                <div class="delay-indicator future"></div>
+                                <div class="duration future"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+                <div class="clock"><span id="live-clock"></span></div>
             </div>
-            <div class="last-updated" id="lastUpdated">Loading...</div>
         </div>
+    <div class="last-updated" id="lastUpdated">Loading...</div>
     </div>
+
 </body>
     <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -561,9 +657,10 @@
         const settingsButton = document.getElementById('settingsButton');
         const settingsPanel = document.getElementById('settings-panel');
         
-        let currentStopId = 1127; // default
-        let currentPlatform = "1"; // default platform 1
+        let currentStopId = 1127;
+        let currentPlatform = "1";
         let currentRunId = null;
+        let isUserChange = false;
 
         const getDepartureApiUrl = () => {
             const baseUrl = `https://melbptboard-opt.onrender.com/api/next-departure?stop_id=${currentStopId}`;
@@ -684,6 +781,8 @@
                 select.addEventListener('change', (e) => {
                     currentStopId = parseInt(e.target.value);
                     if (currentStopId) {
+                        isUserChange = true;  // ADD THIS
+                        hideFutureDepartures();  // ADD THIS - blank immediately
                         updatePlatformDropdown();
                         updateBoard();
                     }
@@ -692,6 +791,8 @@
                 const platformSelect = document.getElementById('platformSelect');
                 platformSelect.addEventListener('change', (e) => {
                     currentPlatform = e.target.value;
+                    isUserChange = true;
+                    hideFutureDepartures(); 
                     updateBoard();
                 });
             }
@@ -1185,11 +1286,166 @@
 
         settingsButton.addEventListener('click', toggleSettings);
 
+        // CSS Theme Switcher
+        const cssSelect = document.getElementById('cssSelect');
+        const themeLink = document.getElementById('theme-link');
+
+        // Load saved theme preference or default to light
+        const savedTheme = localStorage.getItem('theme') || 'light.css';
+        themeLink.href = savedTheme;
+        cssSelect.value = savedTheme;
+
+        // Listen for theme changes
+        cssSelect.addEventListener('change', (e) => {
+            const newTheme = e.target.value;
+            themeLink.href = newTheme;
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // --- PRIORITY 4: FUTURE DEPARTURES ---
+        const updateFutureDepartures = async () => {
+            try {
+                // If user just changed settings, add a small delay
+                if (isUserChange) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    isUserChange = false;  // Reset flag
+                }
+
+                const baseUrl = `https://melbptboard-opt.onrender.com/api/departures?stop_id=${currentStopId}&max_results=3`;
+                const url = currentPlatform ? `${baseUrl}&platform=${currentPlatform}` : baseUrl;
+                
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    hideFutureDepartures();
+                    return;
+                }
+
+                const data = await response.json();
+                
+                // Skip first departure (already shown in main board)
+                const futureDeps = data.departures.slice(1, 3);
+                
+                if (futureDeps.length === 0) {
+                    hideFutureDepartures();
+                    return;
+                }
+                
+                // Populate the two future departure slots
+                populateFutureDeparture(futureDeps[0], 0);
+                populateFutureDeparture(futureDeps[1], 1);
+                
+            } catch (error) {
+                console.error('Error loading future departures:', error);
+                hideFutureDepartures();
+            }
+        };
+
+        const populateFutureDeparture = (departure, index) => {
+            const futureItems = document.querySelectorAll('.departure-item.future');
+            const item = futureItems[index];
+            
+            if (!item) return;
+            
+            if (!departure) {
+                item.style.display = 'none';
+                return;
+            }
+            
+            item.style.display = 'block';
+            
+            // Get route colors
+            const colors = routeColors[departure.route_id];
+            if (colors) {
+                item.style.setProperty('--route-bg-color', colors.background);
+                item.style.setProperty('--route-text-color', colors.text);
+            }
+            
+            // Update time
+            const timeElement = item.querySelector('.departure-time.future');
+            if (timeElement && departure.scheduled_departure_utc) {
+                let timeString = new Date(departure.scheduled_departure_utc).toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit', 
+                    hour12: true 
+                });
+                timeString = timeString.replace('AM', 'am').replace('PM', 'pm');
+                timeElement.textContent = timeString;
+            }
+            
+            // Update destination
+            const destElement = item.querySelector('.destination.future');
+            if (destElement) {
+                const finalStopId = departure.final_stop_id || departure.direction_id;
+                destElement.textContent = getStationName(finalStopId);
+            }
+            
+            // Update delay
+            const delayElement = item.querySelector('.delay-indicator.future');
+            if (delayElement) {
+                if (departure.delay_minutes >= 2) {
+                    delayElement.textContent = `+${departure.delay_minutes}`;
+                    delayElement.style.display = '';
+                } else {
+                    delayElement.textContent = '';
+                    delayElement.style.display = 'none';
+                }
+            }
+            
+            // Update duration
+            const durationElement = item.querySelector('.duration.future');
+            if (durationElement) {
+                durationElement.textContent = calculateDuration(
+                    departure.scheduled_departure_utc, 
+                    departure.estimated_departure_utc
+                );
+            }
+            
+            // Update route info (simplified - just "Stopping all stations")
+            const routeInfoElement = item.querySelector('.route-info.future');
+            if (routeInfoElement) {
+                routeInfoElement.textContent = 'Stopping all stations';
+            }
+        };
+
+        const hideFutureDepartures = () => {
+            const futureItems = document.querySelectorAll('.departure-item.future');
+            futureItems.forEach(item => {
+                item.style.display = 'none';
+            });
+        };
+
         Promise.all([loadStations(), loadRouteOrder()]).then(() => {
             populateStationDropdown();
             updatePlatformDropdown();
             updateBoard();
-            setInterval(updateBoard, 20000);
+            updateFutureDepartures();  // Load immediately, no delay
+            
+            // Update both on the same interval
+            setInterval(() => {
+                updateBoard();
+                updateFutureDepartures();  // Load immediately, no delay
+            }, 20000);
         });
+
     });
+        /* Live Clock */
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const period = (hours >= 12) ? 'pm' : 'am';
+            hours = hours % 12; 
+            hours = hours ? hours : 12; 
+            const timeString = `${hours}:${minutes}:${seconds} ${period}`;
+            const clockElement = document.getElementById('live-clock');
+            if (clockElement) {
+                clockElement.textContent = timeString;
+            }
+        }
+        window.onload = function() {
+            updateClock();
+            setInterval(updateClock, 1000);
+        }
     </script>
