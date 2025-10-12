@@ -1,0 +1,78 @@
+/* darkmode.css */
+
+body {
+    background-color: #000; /* Dark Mode Background */
+    color: #FFF; /* Dark Mode Text Color */
+}
+
+.settings select {
+    background-color: #333434;
+    color: #FFF;
+}
+
+.departure-item {
+    background-color: #000; /* Dark background */
+}
+
+.departure-item.future {
+    border-top: 1px solid #FFF;
+}
+
+.departure-time {
+    color: #FFF;
+}
+
+.destination {
+    color: #FFF;
+}
+
+.duration {
+    background-color: #FFF; /* White background */
+    color: #000; /* Black text */
+}
+
+.route-info {
+    color: #FFF;
+}
+
+.next-stations {
+    border-top: 3px solid #FFF; /* White line to separate */
+}
+
+.station-text {
+    color: #FFF; /* White text for station names on dark background */
+}
+
+.last-updated {
+    color: #333434; /* Dark grey for subtle update text */
+}
+
+#settingsButton svg {
+    fill: #ededed; /* Light color for icon when outside header */
+}
+
+.no-trains {
+    color: #333434; /* Dark grey text */
+}
+
+/* Skipped station styling */
+.next-station.skipped {
+    color: #333434; /* Dark grey text for skipped stations */
+}
+
+.next-station.skipped .station-text {
+    color: #333434; /* Dark grey text for skipped stations */
+}
+
+/* Triangle marker for skipped stations - Outer (larger, black) */
+.next-station.skipped::before {
+    background-color: #000; /* Black fill for the background */
+    /* SVG Mask: same as common, but included here for completeness due to color change */
+    mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:white;stroke-width:8px;"/></svg>');
+    -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:white;stroke-width:8px;"/></svg>');
+}
+
+.clock {
+        background-color: #000;
+        color: #FFF;
+        border: 1px solid #FFF;

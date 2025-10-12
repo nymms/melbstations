@@ -1,0 +1,76 @@
+/* lightmode.css */
+
+body {
+    background-color: #f7f7f7;
+    color: #000;
+}
+
+.settings select {
+    background-color: #FFF;
+    color: #000;
+}
+.departure-container {
+    background-color: #FFF;
+}
+
+.departure-item {
+    background-color: #FFF;
+}
+
+.departure-item.future {
+    border-top: 1px solid #000;
+}
+
+.departure-time {
+    color: #000;
+}
+
+.destination {
+    color: #000;
+}
+
+.duration {
+    background-color: #000;
+    color: #FFF;
+}
+
+.route-info {
+    color: #000;
+}
+
+.next-stations {
+    border-top: 3px solid #000;
+}
+
+.station-text {
+    color: #000;
+}
+
+.last-updated {
+    color: #95979A;
+}
+
+#settingsButton svg {
+    fill: #333434;
+}
+
+.no-trains {
+    color: #95979A; /* Light grey text */
+}
+
+.next-station.skipped .station-text {
+    color: #D7D2CB; /* Light grey text for skipped stations */
+}
+
+/* Triangle marker for skipped stations - Outer (larger, white background) */
+.next-station.skipped::before {
+    background-color: #FFF; /* White fill for the background */
+    /* SVG Mask: same as common, but included here for completeness due to color change */
+    mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:black;stroke-width:8px;"/></svg>');
+    -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:black;stroke-width:8px;"/></svg>');
+}
+
+.clock {
+        background-color: #FFF;
+        color: #000;
+        border: 1px solid #000;
