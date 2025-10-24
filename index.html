@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="light.css" id="theme-link">
+    <link rel="stylesheet" href="light.css" id="departure-link">
+    <link rel="stylesheet" href="ptvnetwork2019.css" id="header-link">
     <title>Melb PT Departure Board</title>
     <style>
     * {
@@ -41,20 +42,298 @@
         font-display: swap;
     }
 
-    /* Station Board (Container) */
     .station-board {
-        width: 1000px;
+        width: 900px;
         margin: 0 auto;
         position: relative;
         left: 0;
     }
 
-    /* Hidden Pin Toggle */
+    .alert-icon {
+        width: 32px;
+        height: 32px;
+        background-color: #FE5000;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 900;
+        font-size: 24px;
+    }
+
+    .clock {
+        font-size: 36px;
+        font-variant-numeric: tabular-nums;
+        width: 25%;
+        height: 106px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 3px 5px;
+    }
+
+    .delay-indicator {
+        color: #FE5000;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .delay-indicator.future {
+        font-size: 16px;
+    }
+
+    .departure-container {
+        transition: margin-top 0.5s ease-out;
+        margin-top: 0px;
+    }
+
+    .departure-header {
+        padding: 15px 20px 0px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 16px solid var(--route-bg-color, #95979A);
+        height: 70px;
+    }
+
+    .departure-header .platform {
+        background-color: var(--route-bg-color, #95979A);
+        color: var(--route-text-color, #000000);
+        padding: 8px;
+        font-size: 28px;
+        font-weight: 900;
+        width: 40px;
+        height: 50px;
+        text-align: center;
+    }
+
+    .departure-header.future {
+        padding: 5px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        height: initial;
+        border-top: none;
+        border-left: 6px solid var(--route-bg-color, #95979A);
+    }
+
+    .departure-item {
+        margin: 0 auto 0 auto;
+        overflow: hidden;
+    }
+
+    .departure-item:has(.no-trains) .departure-header {
+        border: none;
+    }
+
+    .departure-item:has(.no-trains) .next-stations {
+        border: none;
+    }
+
+    .departure-item.future {
+        margin: 4px 0 4px 15px;
+        position: relative;
+        left: 0px;
+    }
+
+    .departure-item:has(.no-trains) .departure-header {
+        border: none;
+    }
+
+    .departure-item:has(.no-trains) .next-stations {
+        border: none;
+    }
+
+    .departure-time {
+        font-size: 38px;
+        font-family: 'Network Sans 2019', Arial, sans-serif;
+    }
+
+    .departure-time.future {
+        font-size: 24px;
+    }
+
+    .departurestack {
+        width: 75%;
+    }
+
+    .destination {
+        font-size: 42px;
+        font-family: 'Network Sans 2019', Arial, sans-serif;
+        font-weight: 600;
+    }
+
+    .destination.future {
+        font-size: 24px;
+        font-weight: 700;
+    }
+
+    .duration {
+        padding: 8px;
+        font-size: 28px;
+        font-weight: normal;
+        min-width: 100px;
+        text-align: center;
+        height: 50px;
+    }
+
+    .duration.future {
+        font-size: 21px;
+        min-width: 80px;
+        height: 30px;
+        padding: 2px;
+    }
+
+    .header-and-platform-wrapper {
+        display: flex;
+        align-items: flex-start;
+        min-height: 130px;
+        transition: margin-top 0.5s ease-out;
+        margin-top: calc(-1 * (var(--header-height, 130px) + 12px));
+        border-radius: ;
+    }
+
     .hidden-pin-toggle {
         display: none;
     }
 
-    /* Pin Button */
+    .hidden-pin-toggle:checked ~ .pin-button ~ .header-and-platform-wrapper {
+        margin-top: 0 !important;
+    }
+
+    .hidden-pin-toggle:checked ~ #settings-panel,
+    .station-board:hover .hidden-pin-toggle:not(:checked) ~ #settings-panel {
+        margin-top: 0 !important;
+    }
+
+    #headerPlatform {
+        text-align: center;
+        color: #333434;
+        background-color: #fff;
+        flex-shrink: 0;
+        border-left: 2px solid #707372;
+        }
+
+    .last-updated {
+        font-size: 8px;
+        padding: 2px;
+    }
+
+    .next-station {
+        font-size: 22px;
+        font-weight: normal;
+        padding-left: 20px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        border-left: 6px solid var(--route-bg-color, #95979A);
+    }
+
+    .next-station::before {
+        content: '◼︎';
+        font-weight: 900;
+        font-size: 12px;
+        position: absolute;
+        left: -2px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 16px;
+        height: 16px;
+        color: var(--route-bg-color, #95979A);
+    }
+
+    .next-station.current {
+        border-left: 6px solid var(--route-bg-color, #95979A);
+    }
+
+    .next-station.current .station-text {
+        padding: 2px 4px;
+        background-color: var(--route-bg-color, #95979A);
+        color: var(--route-text-color, #95979A);
+    }
+
+    .next-station.last-station {
+        border-left: none !important;
+        padding-left: 25px;
+    }
+
+    .next-station.last-station::after {
+        display: none !important;
+    }
+
+    .next-station.last-station::before {
+        content: '';
+        display: inline-block;
+        position: absolute;
+        left: -10px;
+        top: 8px;
+        width: 25px;
+        height: 25px;
+        background-color: var(--route-bg-color, #95979A);
+        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="20" y1="75" x2="80" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="50" y1="0" x2="50" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="20" y1="75" x2="80" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="50" y1="0" x2="50" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+    }
+
+    .next-station.skipped::before {
+        content: '';
+        position: absolute;
+        left: -10px;
+        top: 97%;
+        transform: translate(0, -50%);
+        width: 30px;
+        height: 30px;
+        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:white;stroke-width:8px;"/></svg>');
+        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:white;stroke-width:8px;"/></svg>');
+    }
+
+    .next-station.skipped::after {
+        content: '';
+        position: absolute;
+        left: -10px;
+        top: 75%;
+        transform: translate(0, -50%);
+        width: 30px;
+        height: 30px;
+        background-color: var(--route-bg-color, #95979A); /* Route color fill (same) */
+        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:black;stroke-width:12px;"/></svg>');
+        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:black;stroke-width:12px;"/></svg>');
+    }
+
+    .next-station.skipped ~ .next-station.skipped:before {
+        content: none;
+    }
+
+    .next-station.skipped ~ .next-station.skipped:after {
+        content: none;
+    }
+
+    .next-stations {
+        padding: 0px 20px 15px 0px;
+        margin-left: 20px;
+        margin-right: 20px;
+        min-height: 300px;
+    }
+
+    .no-trains {
+        font-size: 42px;
+        font-weight: 600;
+        text-align: center;
+        top: 50px;
+    }
+
+    .no-trains:before {
+        text-align: center;
+        width: 180px;
+        left: 35%;
+        display: block;
+        position: relative;
+        content: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="matrix(0.240385,0,0,0.240385,-36.1594,-13.7553)"><path d="M282.232,285.192C285.688,285.192 288.568,282.312 288.568,278.856C288.568,275.4 285.688,272.52 282.232,272.52C278.776,272.52 275.896,275.4 275.896,278.856C275.896,282.312 278.776,285.192 282.232,285.192ZM299.224,285.192C302.68,285.192 305.272,282.312 305.272,278.856C305.272,275.4 302.68,272.52 299.224,272.52C295.768,272.52 292.888,275.4 292.888,278.856C292.888,282.312 295.768,285.192 299.224,285.192ZM359.704,285.192C363.16,285.192 366.04,282.312 366.04,278.856C366.04,275.4 363.16,272.52 359.704,272.52C356.248,272.52 353.368,275.4 353.368,278.856C353.368,282.312 356.248,285.192 359.704,285.192ZM376.408,285.192C380.152,285.192 382.744,282.312 382.744,278.856C382.744,275.4 380.152,272.52 376.408,272.52C372.952,272.52 370.36,275.4 370.36,278.856C370.36,282.312 372.952,285.192 376.408,285.192Z" style="fill-rule:nonzero;"/></g><g transform="matrix(0.240385,0,0,0.240385,-86.577,-13.7553)"><g transform="matrix(1,0,0,1,-29.12,0)"><path d="M628.656,305.928L508.272,305.928C497.904,305.928 489.264,297.576 489.264,287.208L489.264,286.92L496.176,191.592L496.176,191.88C496.176,181.512 504.816,172.872 515.184,172.872L621.456,172.872C632.112,172.872 640.464,181.512 640.464,191.88L640.464,191.592L647.664,286.92L647.664,287.208C647.664,297.576 639.024,305.928 628.656,305.928Z" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:8.32px;"/></g><g transform="matrix(1,0,0,1.02439,-29.8,-6.432)"><path d="M611,208.008C611,206.348 609.619,205 607.918,205L530.082,205C528.381,205 527,206.348 527,208.008L524,242.992C524,244.652 525.381,246 527.082,246L610.918,246C612.619,246 614,244.652 614,242.992L611,208.008Z" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:10.87px;stroke-linecap:round;stroke-miterlimit:1.5;"/></g><g transform="matrix(1,0,0,1,-29.12,0)"><path d="M568.464,203.568L568.464,245.568" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:5px;stroke-linecap:round;stroke-miterlimit:1.5;"/></g><g transform="matrix(1,0,0,1,159.539,5.01469)"><path d="M300,335L459,335" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:11px;stroke-linecap:round;stroke-miterlimit:1.5;"/></g><g transform="matrix(1,0,0,1,160.344,5.01469)"><path d="M314,316L444,316" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:5px;stroke-linecap:round;stroke-miterlimit:1.5;"/></g><g transform="matrix(1.34459,0,0,1,24.7651,5.01469)"><path d="M365,300.913L360,300.913C360,300.913 340.912,338.471 334.531,351.025C334.13,351.815 334.087,352.837 334.419,353.683C334.751,354.528 335.403,355.057 336.114,355.057L347.514,355.057C348.193,355.057 348.805,354.503 349.061,353.657C351.628,345.162 365,300.913 365,300.913Z" style="fill-rule:nonzero;"/></g><g transform="matrix(-1.34459,0,0,1,1053.7,5.01469)"><path d="M365,300.913L360,300.913C360,300.913 340.912,338.471 334.531,351.025C334.13,351.815 334.087,352.837 334.419,353.683C334.751,354.528 335.403,355.057 336.114,355.057L347.514,355.057C348.193,355.057 348.805,354.503 349.061,353.657C351.628,345.162 365,300.913 365,300.913Z" style="fill-rule:nonzero;"/></g></g><g transform="matrix(-2.67017,0,0,2.67017,100.916,10.1879)"><path d="M11.119,8.559C11.155,8.091 11.563,7.755 12.031,7.791C12.499,7.827 12.835,8.235 12.799,8.691C12.763,9.159 12.355,9.507 11.899,9.471C11.431,9.435 11.083,9.027 11.119,8.559Z" style="fill-rule:nonzero;"/></g><g transform="matrix(-2.67017,0,0,2.67017,100.916,10.1879)"><path d="M14.671,13.023C14.587,13.143 14.455,13.203 14.323,13.203C14.239,13.203 14.155,13.179 14.071,13.131L12.919,12.327C12.859,12.291 12.811,12.231 12.775,12.171L12.391,11.403L11.899,13.647L13.147,14.907C13.219,14.979 13.279,15.075 13.291,15.183L13.603,17.355C13.639,17.631 13.447,17.895 13.171,17.931L13.099,17.931C12.847,17.931 12.631,17.751 12.595,17.499L12.319,15.495L11.047,14.235L10.759,15.531C10.747,15.591 10.723,15.651 10.687,15.711L9.355,17.703C9.259,17.859 9.103,17.931 8.935,17.931C8.839,17.931 8.743,17.907 8.659,17.847C8.419,17.691 8.359,17.379 8.515,17.151L9.787,15.219L10.711,11.103L9.991,11.811L9.619,13.239C9.559,13.431 9.391,13.563 9.199,13.563C9.163,13.563 9.115,13.551 9.067,13.539C8.851,13.467 8.731,13.227 8.791,13.011L9.187,11.487C9.211,11.415 9.247,11.343 9.307,11.295L10.615,9.975C10.711,9.879 10.843,9.831 10.987,9.831L12.235,9.831C12.439,9.831 12.607,9.939 12.703,10.107L13.495,11.679L14.551,12.411C14.755,12.555 14.815,12.831 14.671,13.023Z" style="fill-rule:nonzero;"/></g><g transform="matrix(1.15158,0,0,1.15158,-3.80791,-4.41653)"><circle cx="46.367" cy="50.382" r="33.471" style="fill:none;stroke:rgb(207,32,47);stroke-width:1.3px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"/></g><path d="M23.427,25.305L75.868,81.789" style="fill:none;stroke:rgb(207,32,47);stroke-width:1.5px;stroke-linejoin:round;stroke-miterlimit:1.5;"/></g><path d="M23.427,25.305L75.868,81.789" style="fill:none;stroke:rgb(207,32,47);stroke-width:1.5px;stroke-linejoin:round;stroke-miterlimit:1.5;"/></svg>');
+    }
+
+    .otherdepartures {
+        display: flex;
+    }
+
     .pin-button {
         position: absolute;
         top: 150px;
@@ -78,153 +357,17 @@
         transition: transform 0.3s ease-out;
     }
 
-    /* Pinned state */
     .hidden-pin-toggle:checked + .pin-button svg {
         transform: rotate(45deg);
     }
 
-    /* Settings Panel */
-    .settings {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 12px;
-        visibility: hidden;
-        opacity: 0;
-        transition: opacity 0.3s ease, visibility 0.3s ease;
-        position: relative;
-        left: 60px;
-        width: 100%;
-        z-index: 1000;
+    .route-bgcolor {
+        background-color: #95979A;
+        color: #000000;
     }
 
-    /* Settings Auto-Hide */
-    .station-board:hover .settings.visible {
-        opacity: 1;
-        visibility: visible;
-    }
-
-    .settings select {
-        padding: 2px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
-    }
-
-    /* Header */
-    .station-header {
-        width: 100%;
-        background-color: #fff; /* Common: White background for the header */
-        padding: 12px;
-        text-align: center;
-        border-radius: 8px 8px 24px 24px;
-        box-shadow: inset 0 8px 8px -10px rgba(0, 0, 0, 0.8);
-        margin-top: calc(-1 * (var(--header-height, 130px) + 12px));
-        transition: margin-top 0.5s ease-out;
-        position: relative;
-        z-index: 1001;
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-    }
-
-    /* Header visibility */
-    .hidden-pin-toggle:checked ~ .station-header,
-    .station-board:hover .hidden-pin-toggle:not(:checked) ~ .station-header {
-        margin-top: 0;
-    }
-
-    .station-name {
-        font-size: 56px;
-        font-weight: 600;
-        color: #333434;
-        padding-top: 16px;
-        border-top: 16px solid #0072CE;
-        margin-bottom: 10px;
-        width: 100%;
-        height: 100px
-    }
-
-    /* Platform in Header */
-    .station-header .platform {
-        font-size: 90px;
-        font-weight: 500;
-        color: #333434;
-        padding: 4px 8px;
-        border-radius: 0px;
-        margin-left: 10px;
-        flex-shrink: 0;
-        width: 100px;
-        height: 120px;
-        border-left: solid 2px #95979A;
-    }
-
-    /* Departure Item (The main train block) */
-    .departure-item {
-        margin: 0 auto 0 auto;
-        overflow: hidden;
-    }
-
-    .departure-header {
-        padding: 15px 20px 0px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-top: 16px solid var(--route-bg-color, #95979A); /* Dynamic route color */
-        height: 70px;
-    }
-
-    .time-destination {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-
-    .departure-time {
-        font-size: 38px;
-        font-family: 'Network Sans 2019', Arial, sans-serif;
-        /* Color is different */
-    }
-
-    .destination {
-        font-size: 42px;
-        font-family: 'Network Sans 2019', Arial, sans-serif;
-        font-weight: 600;
-        /* Color is different */
-    }
-
-    .alert-icon {
-        width: 32px;
-        height: 32px;
-        background-color: #FE5000;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: 900;
-        font-size: 24px;
-    }
-
-    .time-info {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .delay-indicator {
-        color: #FE5000; /* Common: Orange/Red for delay */
-        font-size: 28px;
-        font-weight: bold;
-    }
-
-    .duration {
-        padding: 8px;
-        font-size: 28px;
-        font-weight: normal;
-        min-width: 100px;
-        text-align: center;
-        height: 50px;
-        /* Background and text color are inverted */
+    .route-color {
+        color: #95979A;
     }
 
     .route-info {
@@ -237,159 +380,35 @@
         height: 50px;
     }
 
-    /* Platform in Departure Item */
-    .departure-header .platform {
-        background-color: var(--route-bg-color, #95979A);
-        color: var(--route-text-color, #000000);
-        padding: 8px;
-        font-size: 28px;
-        font-weight: 900;
-        width: 40px;
-        height: 50px;
-        text-align: center;
+    .route-info.future {
+        padding: 0px;
+        font-size: 18px;
+        justify-content: normal;
+        align-items: normal;
+        height: initial;
     }
 
-    /* Route Colors (Defaults) */
-    .route-color {color: #95979A;}
-    .route-bgcolor {background-color: #95979A; color: #000000;}
-
-    /* Next Stations Display */
-    .next-stations {
-        padding: 0px 20px 15px 0px;
-        margin-left: 20px;
-        margin-right: 20px;
-        /* border-top color is different */
-        min-height: 300px;
-    }
-
-    .stations-list {
-        display: flex;
-        flex-direction: row;
-        gap: 20px;
-        align-items: flex-start;
-    }
-
-    .stations-column {
-        display: flex;
-        flex-direction: column;
-        width: 33%;
-        padding-top: 12px;
-        background-repeat: no-repeat;
-        position: relative;
-    }
-
-    /* SVG mask for route line (start of column) */
-    .stations-column::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 25px;
-        height: 25px;
-        background-color: var(--route-bg-color, #95979A);
-        z-index: 1;
-        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-    }
-
-    /* SVG mask for route line (first column special case) */
-    .stations-column:first-child::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 25px;
-        height: 25px;
-        background-color: var(--route-bg-color, #95979A);
-        z-index: 1;
-        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="0" x2="11" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="0" x2="11" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-    }
-
-    .stations-column:first-child {
-        padding-top: 8px;
-    }
-
-    .next-station {
-        /* Color is implicitly overridden by .station-text anyway */
-        font-size: 22px;
-        font-weight: normal;
-        padding-left: 20px;
-        position: relative;
+    .settings {
         display: flex;
         align-items: center;
-        border-left: 6px solid var(--route-bg-color, #95979A);
+        gap: 10px;
+        padding: 12px;
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        position: relative;
+        margin-top: 0px;
+        left: 60px;
+        width: 100%;
+        z-index: 1000;
     }
 
-    /* Station marker (square) */
-    .next-station::before {
-        content: '◼︎';
-        font-weight: 900;
-        font-size: 12px;
-        position: absolute;
-        left: -2px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 16px;
-        height: 16px;
-        color: var(--route-bg-color, #95979A);
-    }
-
-    .next-station.current {
-        /* Color is implicitly overridden by .station-text anyway */
-        border-left: 6px solid var(--route-bg-color, #95979A);
-    }
-
-    .next-station.current .station-text {
-        padding: 2px 4px;
-        background-color: var(--route-bg-color, #95979A);
-        color: var(--route-text-color, #95979A);
-    }
-
-    .next-station.last-station {
-        border-left: none !important;
-        padding-left: 25px;
-    }
-
-    .next-station.last-station::after {
-        display: none !important;
-    }
-
-    /* terminating station T symbol */
-    .next-station.last-station::before {
-        content: '';
-        display: inline-block;
-        position: absolute;
-        left: -10px;
-        top: 8px;
-        width: 25px;
-        height: 25px;
-        background-color: var(--route-bg-color, #95979A);
-        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="20" y1="75" x2="80" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="50" y1="0" x2="50" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="20" y1="75" x2="80" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="50" y1="0" x2="50" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-    }
-
-    /* station route continuation dashes */
-    .stations-column .next-station:last-child:not(.last-station)::after {
-        content: '';
-        position: absolute;
-        left: -6px;
-        top: 41px;
-        transform: translateY(-50%);
-        width: 25px;
-        height: 25px;
-        background-color: var(--route-bg-color, #95979A);
-        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-    }
-
-    .last-updated {
-        font-size: 8px;
+    .settings select {
         padding: 2px;
-        /* Color is different */
+        border: 1px solid #ccc;
+        border-radius: 3px;
     }
 
-    /* Settings Button */
     #settingsButton {
         background: none;
         border: none;
@@ -408,7 +427,6 @@
         width: 20px;
         height: 20px;
         display: block;
-        /* Fill color is different */
     }
 
     #settingsButton:hover #gearOutline {
@@ -419,140 +437,108 @@
         transition: fill 0.3s ease;
     }
 
-    /* No Trains Message */
-    .no-trains {
-        font-size: 42px;
-        font-weight: 600;
-        text-align: center;
-        /* Color is different */
-        top: 50px;
+    .station-board:hover .hidden-pin-toggle:not(:checked) ~ .pin-button ~ .header-and-platform-wrapper {
+        margin-top: 0 !important;
     }
 
-    /* Train Icon for No Trains Message (using data URI) */
-    .no-trains:before {
-        text-align: center;
-        width: 180px;
-        left: 35%;
-        display: block;
+    .station-board:hover .settings.visible {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .station-header {
+        width: 100%;
+        box-shadow: inset 0 8px 8px -10px rgba(0, 0, 0, 0.8);
+        transition: margin-top 0.5s ease-out;
         position: relative;
-        content: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><g transform="matrix(0.240385,0,0,0.240385,-36.1594,-13.7553)"><path d="M282.232,285.192C285.688,285.192 288.568,282.312 288.568,278.856C288.568,275.4 285.688,272.52 282.232,272.52C278.776,272.52 275.896,275.4 275.896,278.856C275.896,282.312 278.776,285.192 282.232,285.192ZM299.224,285.192C302.68,285.192 305.272,282.312 305.272,278.856C305.272,275.4 302.68,272.52 299.224,272.52C295.768,272.52 292.888,275.4 292.888,278.856C292.888,282.312 295.768,285.192 299.224,285.192ZM359.704,285.192C363.16,285.192 366.04,282.312 366.04,278.856C366.04,275.4 363.16,272.52 359.704,272.52C356.248,272.52 353.368,275.4 353.368,278.856C353.368,282.312 356.248,285.192 359.704,285.192ZM376.408,285.192C380.152,285.192 382.744,282.312 382.744,278.856C382.744,275.4 380.152,272.52 376.408,272.52C372.952,272.52 370.36,275.4 370.36,278.856C370.36,282.312 372.952,285.192 376.408,285.192Z" style="fill-rule:nonzero;"/></g><g transform="matrix(0.240385,0,0,0.240385,-86.577,-13.7553)"><g transform="matrix(1,0,0,1,-29.12,0)"><path d="M628.656,305.928L508.272,305.928C497.904,305.928 489.264,297.576 489.264,287.208L489.264,286.92L496.176,191.592L496.176,191.88C496.176,181.512 504.816,172.872 515.184,172.872L621.456,172.872C632.112,172.872 640.464,181.512 640.464,191.88L640.464,191.592L647.664,286.92L647.664,287.208C647.664,297.576 639.024,305.928 628.656,305.928Z" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:8.32px;"/></g><g transform="matrix(1,0,0,1.02439,-29.8,-6.432)"><path d="M611,208.008C611,206.348 609.619,205 607.918,205L530.082,205C528.381,205 527,206.348 527,208.008L524,242.992C524,244.652 525.381,246 527.082,246L610.918,246C612.619,246 614,244.652 614,242.992L611,208.008Z" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:10.87px;stroke-linecap:round;stroke-miterlimit:1.5;"/></g><g transform="matrix(1,0,0,1,-29.12,0)"><path d="M568.464,203.568L568.464,245.568" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:5px;stroke-linecap:round;stroke-miterlimit:1.5;"/></g><g transform="matrix(1,0,0,1,159.539,5.01469)"><path d="M300,335L459,335" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:11px;stroke-linecap:round;stroke-miterlimit:1.5;"/></g><g transform="matrix(1,0,0,1,160.344,5.01469)"><path d="M314,316L444,316" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:5px;stroke-linecap:round;stroke-miterlimit:1.5;"/></g><g transform="matrix(1.34459,0,0,1,24.7651,5.01469)"><path d="M365,300.913L360,300.913C360,300.913 340.912,338.471 334.531,351.025C334.13,351.815 334.087,352.837 334.419,353.683C334.751,354.528 335.403,355.057 336.114,355.057L347.514,355.057C348.193,355.057 348.805,354.503 349.061,353.657C351.628,345.162 365,300.913 365,300.913Z" style="fill-rule:nonzero;"/></g><g transform="matrix(-1.34459,0,0,1,1053.7,5.01469)"><path d="M365,300.913L360,300.913C360,300.913 340.912,338.471 334.531,351.025C334.13,351.815 334.087,352.837 334.419,353.683C334.751,354.528 335.403,355.057 336.114,355.057L347.514,355.057C348.193,355.057 348.805,354.503 349.061,353.657C351.628,345.162 365,300.913 365,300.913Z" style="fill-rule:nonzero;"/></g></g><g transform="matrix(-2.67017,0,0,2.67017,100.916,10.1879)"><path d="M11.119,8.559C11.155,8.091 11.563,7.755 12.031,7.791C12.499,7.827 12.835,8.235 12.799,8.691C12.763,9.159 12.355,9.507 11.899,9.471C11.431,9.435 11.083,9.027 11.119,8.559Z" style="fill-rule:nonzero;"/></g><g transform="matrix(-2.67017,0,0,2.67017,100.916,10.1879)"><path d="M14.671,13.023C14.587,13.143 14.455,13.203 14.323,13.203C14.239,13.203 14.155,13.179 14.071,13.131L12.919,12.327C12.859,12.291 12.811,12.231 12.775,12.171L12.391,11.403L11.899,13.647L13.147,14.907C13.219,14.979 13.279,15.075 13.291,15.183L13.603,17.355C13.639,17.631 13.447,17.895 13.171,17.931L13.099,17.931C12.847,17.931 12.631,17.751 12.595,17.499L12.319,15.495L11.047,14.235L10.759,15.531C10.747,15.591 10.723,15.651 10.687,15.711L9.355,17.703C9.259,17.859 9.103,17.931 8.935,17.931C8.839,17.931 8.743,17.907 8.659,17.847C8.419,17.691 8.359,17.379 8.515,17.151L9.787,15.219L10.711,11.103L9.991,11.811L9.619,13.239C9.559,13.431 9.391,13.563 9.199,13.563C9.163,13.563 9.115,13.551 9.067,13.539C8.851,13.467 8.731,13.227 8.791,13.011L9.187,11.487C9.211,11.415 9.247,11.343 9.307,11.295L10.615,9.975C10.711,9.879 10.843,9.831 10.987,9.831L12.235,9.831C12.439,9.831 12.607,9.939 12.703,10.107L13.495,11.679L14.551,12.411C14.755,12.555 14.815,12.831 14.671,13.023Z" style="fill-rule:nonzero;"/></g><g transform="matrix(1.15158,0,0,1.15158,-3.80791,-4.41653)"><circle cx="46.367" cy="50.382" r="33.471" style="fill:none;stroke:rgb(207,32,47);stroke-width:1.3px;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1.5;"/></g><path d="M23.427,25.305L75.868,81.789" style="fill:none;stroke:rgb(207,32,47);stroke-width:1.5px;stroke-linejoin:round;stroke-miterlimit:1.5;"/></g><path d="M23.427,25.305L75.868,81.789" style="fill:none;stroke:rgb(207,32,47);stroke-width:1.5px;stroke-linejoin:round;stroke-miterlimit:1.5;"/></svg>');
+        z-index: 1001;
+        display: flex;
+        justify-content: flex-start;
+        align-items: flex-start;
+        flex-grow: 1;
     }
 
-    .departure-item:has(.no-trains) .next-stations {
-        border: none;
+    .station-name {
+        font-size: 56px;
+        padding-top: 16px;
+        width: 100%;
+        height: 100px;
     }
 
-    .departure-item:has(.no-trains) .departure-header {
-        border: none;
+    .stations-column {
+        display: flex;
+        flex-direction: column;
+        width: 33%;
+        padding-top: 12px;
+        background-repeat: no-repeat;
+        position: relative;
     }
 
-    /* Triangle marker for skipped stations - Outer (larger, background-color different) */
-    .next-station.skipped::before {
+    .stations-column::before {
         content: '';
         position: absolute;
-        left: -10px;
-        top: 97%;
-        transform: translate(0, -50%);
-        width: 30px;
-        height: 30px;
-        /* Background color is different */
-        /* SVG Mask for the outer shape */
-        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:white;stroke-width:8px;"/></svg>');
-        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:white;stroke-width:8px;"/></svg>');
+        top: 0;
+        left: 0;
+        width: 25px;
+        height: 25px;
+        background-color: var(--route-bg-color, #95979A);
+        z-index: 1;
+        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
     }
 
-    /* Triangle marker for skipped stations - Inner (smaller) */
-    .next-station.skipped::after {
+    .stations-column:first-child {
+        padding-top: 8px;
+    }
+
+    .stations-column:first-child::before {
         content: '';
         position: absolute;
-        left: -10px;
-        top: 75%;
-        transform: translate(0, -50%);
-        width: 30px;
-        height: 30px;
-        background-color: var(--route-bg-color, #95979A); /* Route color fill (same) */
-        /* SVG Mask for the inner fill area (same) */
-        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:black;stroke-width:12px;"/></svg>');
-        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:black;stroke-width:12px;"/></svg>');
+        top: 0;
+        left: 0;
+        width: 25px;
+        height: 25px;
+        background-color: var(--route-bg-color, #95979A);
+        z-index: 1;
+        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="0" x2="11" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="0" x2="11" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
     }
 
-    .next-station.skipped ~ .next-station.skipped:before {
-        content: none;
+    .stations-column .next-station:last-child:not(.last-station)::after {
+        content: '';
+        position: absolute;
+        left: -6px;
+        top: 41px;
+        transform: translateY(-50%);
+        width: 25px;
+        height: 25px;
+        background-color: var(--route-bg-color, #95979A);
+        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
     }
 
-    .next-station.skipped ~ .next-station.skipped:after {
-        content: none;
+    .stations-list {
+        display: flex;
+        flex-direction: row;
+        gap: 20px;
+        align-items: flex-start;
     }
 
-    .delay-indicator.future {
-        font-size: 16px;
-    }
-
-    .route-info.future {
-        padding: 0px;
-        font-size: 18px;
-        justify-content: normal;
-        align-items: normal;
-        height: initial;
-    }
-
-    .departure-item.future {
-        margin: 4px 0 4px 15px;
-        position: relative;
-        left: 0px;
-    }
-
-    .departure-header.future {
-        padding: 5px;
-        margin-top: 5px;
-        margin-bottom: 5px;
-        height: initial;
-    }
-            
-    .departure-time.future {
-        font-size: 24px;
-    }
-
-    .destination.future {
-        font-size: 24px;
-        font-weight: 700;
-    }
-
-    .duration.future {
-        font-size: 21px;
-        min-width: 80px;
-        height: 30px;
-        padding: 2px;
-    }
-
-    .departure-header.future {
-        border-top: none;
-        border-left: 6px solid var(--route-bg-color, #95979A);
+    .time-destination {
+        display: flex;
+        align-items: center;
+        gap: 15px;
     }
 
     .time-destination.future {
         gap: 10px;
     }
 
-    .clock {
-        font-size: 40px;
-        font-variant-numeric: tabular-nums;
-        width: 25%;
-        height: 106px;
+    .time-info {
         display: flex;
         align-items: center;
-        justify-content: center;
-        margin: 3px 5px;
+        gap: 8px;
     }
-
-    .otherdepartures {
-        display: flex;
-    }
-
-    .departurestack {
-        width: 75%;
-    }
-
     </style>
 </head>
 <body>
@@ -563,9 +549,9 @@
                 <path d="M16 12V4H17V2H7V4H8V12L6 14V16H11.2V22H12.8V16H18V14L16 12Z" />
             </svg>
         </label>
+        <div class="header-and-platform-wrapper">
         <div class="station-header">
             <div class="station-name"></div>
-            <div class="platform"></div>
             <!-- The settings button is now INSIDE the header div -->
             <button id="settingsButton" aria-expanded="false" aria-controls="settings-panel" title="Toggle Settings">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
@@ -574,6 +560,8 @@
                 </svg>
             </button>
         </div>
+        <div class="platform" id="headerPlatform"></div>
+    </div>
         <!-- The settings panel is now positioned directly after the header -->
         <div class="settings" id="settings-panel">
             <select id="stationSelect">
@@ -582,9 +570,15 @@
             <select id="platformSelect" style="width:40px;">
             <option value="">All Platforms</option>
             </select>
-            <select id="cssSelect">
+            <select id="cssDeparture">
             <option value="light.css">light</option>
             <option value="dark.css">dark</option>
+            </select>
+            <select id="cssHeader">
+            <option value="ptvnetwork2019.css">PTV 2024</option>
+            <option value="ptvhelvetica.css">PTV 2012</option>
+            <option value="metlink2003.css">Metlink 2003</option>
+            <option value="ptcgoudy.css">PTC Goudy</option>
             </select>
         </div>
         <div class="departure-container">
@@ -645,7 +639,7 @@
         const departureItem = document.querySelector('.departure-item');
         const destinationElement = document.querySelector('.destination');
         const platformElement = document.querySelector('.departure-header .platform');
-        const headerPlatformElement = document.querySelector('.station-header .platform');
+        const headerPlatformElement = document.getElementById('headerPlatform');
         const stationNameElement = document.querySelector('.station-name');
         const lastUpdatedElement = document.getElementById('lastUpdated');
         const routeInfoElement = document.querySelector('.route-info span');
@@ -1286,20 +1280,36 @@
 
         settingsButton.addEventListener('click', toggleSettings);
 
-        // CSS Theme Switcher
-        const cssSelect = document.getElementById('cssSelect');
-        const themeLink = document.getElementById('theme-link');
+        // CSS Theme Switcher Departures
+        const cssDeparture = document.getElementById('cssDeparture');
+        const themeLink = document.getElementById('departure-link');
+
+        // CSS Theme Switcher Header
+        const cssHeader = document.getElementById('cssHeader');
+        const theme2Link = document.getElementById('header-link');
 
         // Load saved theme preference or default to light
         const savedTheme = localStorage.getItem('theme') || 'light.css';
         themeLink.href = savedTheme;
-        cssSelect.value = savedTheme;
+        cssDeparture.value = savedTheme;
+
+        // Load saved theme preference or default to ptvnetwork2019
+        const savedTheme2 = localStorage.getItem('theme2') || 'ptvnetwork2019.css';
+        theme2Link.href = savedTheme2;
+        cssHeader.value = savedTheme2;
 
         // Listen for theme changes
-        cssSelect.addEventListener('change', (e) => {
+        cssDeparture.addEventListener('change', (e) => {
             const newTheme = e.target.value;
             themeLink.href = newTheme;
             localStorage.setItem('theme', newTheme);
+        });
+
+        // Listen for theme changes
+        cssHeader.addEventListener('change', (e) => {
+            const newTheme2 = e.target.value;
+            theme2Link.href = newTheme2;
+            localStorage.setItem('theme2', newTheme2);
         });
 
         // --- PRIORITY 4: FUTURE DEPARTURES ---
