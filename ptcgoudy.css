@@ -1,0 +1,43 @@
+/* PTC Goudy Old Style */
+body {
+        background-color: #333 !important;
+}
+
+#headerPlatform {
+        font-family: 'Goudy Old Style', serif;
+        font-weight: 600;
+        font-size: 150px;
+        line-height: 0.8;        
+        padding: 4px;
+        width: 150px;
+        height: 140px;
+        margin: 16px;
+        border-radius: 0;
+        background-color: #006767 !important;
+        color: #FFF !important;
+}
+
+.header-and-platform-wrapper {
+        border-radius: 0px;
+        border: 4px solid #000;
+        background-color: #FFF; 
+}
+
+.station-header {
+        padding: 12px 0px 0px 0px;
+        text-align: right;
+        box-shadow: none !important;
+}
+
+.station-name {
+        font-family: 'Goudy Old Style', serif;
+        font-weight: 600;
+        font-size: 70px !important;
+        text-align: center;
+        background-color: #FFF;
+        color: #006767;
+        padding-top: 0px !important;
+        margin: 16px 16px;
+        height: 96px !important;
+        border-bottom: 16px solid #FFD700;
+}
