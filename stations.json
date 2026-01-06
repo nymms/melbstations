@@ -229,9 +229,9 @@
     {"stop_id": 1236, "stop_name": "ANZAC", "stop_suburb": "Melbourne", "number_of_platforms": 2}
   ],
   "metadata": {
-    "total_count": 222,
-    "created": "2025-09-17",
+    "total_count": 227,
+    "created": "2026-01-06",
     "source": "PTV API via multiple methods",
-    "note": "Complete list of Melbourne train stations with platform counts (default: 2 platforms, to be manually updated)"
+    "note": "Complete list of Melbourne train stations with platform counts (default: 2 platforms)"
   }
 }
