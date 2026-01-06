@@ -221,7 +221,12 @@
     {"stop_id": 1213, "stop_name": "Willison", "stop_suburb": "Camberwell", "number_of_platforms": 2},
     {"stop_id": 1214, "stop_name": "Windsor", "stop_suburb": "Windsor", "number_of_platforms": 2},
     {"stop_id": 1215, "stop_name": "Yarraman", "stop_suburb": "Noble Park", "number_of_platforms": 2},
-    {"stop_id": 1216, "stop_name": "Yarraville", "stop_suburb": "Yarraville", "number_of_platforms": 2}
+    {"stop_id": 1216, "stop_name": "Yarraville", "stop_suburb": "Yarraville", "number_of_platforms": 2},
+    {"stop_id": 1232, "stop_name": "Arden", "stop_suburb": "North Melbourne", "number_of_platforms": 2},
+    {"stop_id": 1233, "stop_name": "Parkville", "stop_suburb": "Parkville", "number_of_platforms": 2},
+    {"stop_id": 1234, "stop_name": "State Library", "stop_suburb": "Melbourne", "number_of_platforms": 2},
+    {"stop_id": 1235, "stop_name": "Town Hall", "stop_suburb": "Melbourne", "number_of_platforms": 2},
+    {"stop_id": 1236, "stop_name": "ANZAC", "stop_suburb": "Melbourne", "number_of_platforms": 2}
   ],
   "metadata": {
     "total_count": 222,
