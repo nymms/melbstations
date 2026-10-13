@@ -226,7 +226,7 @@
     {"stop_id": 1233, "stop_name": "Parkville", "stop_suburb": "Parkville", "number_of_platforms": 2},
     {"stop_id": 1234, "stop_name": "State Library", "stop_suburb": "Melbourne", "number_of_platforms": 2},
     {"stop_id": 1235, "stop_name": "Town Hall", "stop_suburb": "Melbourne", "number_of_platforms": 2},
-    {"stop_id": 1236, "stop_name": "ANZAC", "stop_suburb": "Melbourne", "number_of_platforms": 2}
+    {"stop_id": 1236, "stop_name": "Anzac", "stop_suburb": "Melbourne", "number_of_platforms": 2}
   ],
   "metadata": {
     "total_count": 227,
