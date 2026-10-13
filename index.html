@@ -906,6 +906,10 @@
             
             // Check if there are any future City Loop stations
             const hasFutureLoopStations = futureStopIds.some(id => loopStations.includes(id));
+
+            // Check if there are any future Metro Tunnel stations (not counting the current station)
+            const tunnelStations = [1232, 1233, 1234, 1235, 1236]; // Arden, Parkville, State Library, Town Hall, Anzac
+            const hasFutureTunnelStations = futureStopIds.slice(1).some(id => tunnelStations.includes(id));
             
             // Build route description based on express detection
             let baseText = "Stopping all stations";
@@ -919,6 +923,10 @@
             
             if (hasFutureLoopStations) {
                 return `${baseText} via City Loop`;
+            }
+                        
+            if (hasFutureTunnelStations) {
+                return `${baseText} via Metro Tunnel`;
             }
             
             return baseText;
