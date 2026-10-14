@@ -706,15 +706,26 @@
         };
 
         const getRouteSegment = (routeId, currentStopId, finalStopId) => {
-            if (!routeOrderData || !routeOrderData[routeId]) return null;
-            
-            const routeStops = routeOrderData[routeId].stops;
-            
-            // Find positions in the route order
-            const currentPos = routeStops.findIndex(s => s.stop_id === currentStopId);
-            const finalPos = routeStops.findIndex(s => s.stop_id === finalStopId);
-            
-            if (currentPos === -1 || finalPos === -1) return null;
+            if (!routeOrderData) return null;
+
+            // Lists this route can use: its own list, plus any combined list that names this route
+            let routeStops = null;
+            let currentPos = -1;
+            let finalPos = -1;
+            for (const [key, route] of Object.entries(routeOrderData)) {
+                const usable = key === String(routeId) || (route.route_ids && route.route_ids.includes(Number(routeId)));
+                if (!usable) continue;
+                const c = route.stops.findIndex(s => s.stop_id === currentStopId);
+                const f = route.stops.findIndex(s => s.stop_id === finalStopId);
+                if (c !== -1 && f !== -1) {
+                    routeStops = route.stops;
+                    currentPos = c;
+                    finalPos = f;
+                    break;
+                }
+            }
+
+            if (!routeStops) return null;
             
             // Determine direction and extract segment
             let segment;
