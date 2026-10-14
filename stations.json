@@ -6,7 +6,7 @@
     {"stop_id": 1004, "stop_name": "Alphington", "stop_suburb": "Alphington", "number_of_platforms": 2},
     {"stop_id": 1005, "stop_name": "Altona", "stop_suburb": "Altona", "number_of_platforms": 1},
     {"stop_id": 1006, "stop_name": "Anstey", "stop_suburb": "Brunswick", "number_of_platforms": 2},
-    {"stop_id": 1236, "stop_name": "Anzac", "stop_suburb": "Melbourne", "number_of_platforms": 2},
+    {"stop_id": 1236, "stop_name": "Anzac", "stop_suburb": "Melbourne", "number_of_platforms": 2, "interchange": true},
     {"stop_id": 1232, "stop_name": "Arden", "stop_suburb": "North Melbourne", "number_of_platforms": 2},
     {"stop_id": 1008, "stop_name": "Armadale", "stop_suburb": "Armadale", "number_of_platforms": 4},
     {"stop_id": 1009, "stop_name": "Ascot Vale", "stop_suburb": "Ascot Vale", "number_of_platforms": 2},
