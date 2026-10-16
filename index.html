@@ -468,7 +468,7 @@
     .stations-column {
         display: flex;
         flex-direction: column;
-        width: 33%;
+        flex: 1; /* Automatically scales widths whether there are 1, 2, 3, or 4 columns */
         padding-top: 12px;
         background-repeat: no-repeat;
         position: relative;
@@ -847,26 +847,32 @@
             if (numStops <= 7) {
                 return { columns: 1, distribution: [numStops] };
             }
-            
+    
             if (numStops <= 14) {
                 const col1 = Math.ceil(numStops / 2);
                 const col2 = numStops - col1;
                 return { columns: 2, distribution: [col1, col2] };
             }
-            
+    
             if (numStops <= 24) {
                 const base = Math.floor(numStops / 3);
                 const remainder = numStops % 3;
                 const distribution = [base, base, base];
-                
+        
                 for (let i = 0; i < remainder; i++) {
                     distribution[i]++;
                 }
                 return { columns: 3, distribution };
             }
-            
-            const col3 = numStops - 20;
-            return { columns: 3, distribution: [10, 10, col3] };
+    
+            if (numStops <= 30) {
+                const col3 = numStops - 20;
+                return { columns: 3, distribution: [10, 10, col3] };
+            }
+    
+            // 31 or more stations: Columns 1, 2, and 3 get 10 each, rest go to column 4
+            const col4 = numStops - 30;
+            return { columns: 4, distribution: [10, 10, 10, col4] };
         };
 
         // route-info analysis
