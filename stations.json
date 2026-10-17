@@ -30,7 +30,7 @@
     {"stop_id": 1027, "stop_name": "Brighton Beach", "stop_suburb": "Brighton", "number_of_platforms": 2},
     {"stop_id": 1028, "stop_name": "Broadmeadows", "stop_suburb": "Broadmeadows", "number_of_platforms": 3, "interchange": true},
     {"stop_id": 1029, "stop_name": "Brunswick", "stop_suburb": "Brunswick", "number_of_platforms": 2},
-    {"stop_id": 1030, "stop_name": "Burnley", "stop_suburb": "Burnley", "number_of_platforms": 4 "interchange": true},
+    {"stop_id": 1030, "stop_name": "Burnley", "stop_suburb": "Burnley", "number_of_platforms": 4, "interchange": true},
     {"stop_id": 1031, "stop_name": "Burwood", "stop_suburb": "Glen Iris", "number_of_platforms": 2},
     {"stop_id": 1032, "stop_name": "Camberwell", "stop_suburb": "Camberwell", "number_of_platforms": 3, "interchange": true},
     {"stop_id": 1033, "stop_name": "Canterbury", "stop_suburb": "Canterbury", "number_of_platforms": 2},
