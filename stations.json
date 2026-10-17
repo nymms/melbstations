@@ -187,7 +187,7 @@
     {"stop_id": 1179, "stop_name": "South Kensington", "stop_suburb": "Kensington", "number_of_platforms": 2},
     {"stop_id": 1224, "stop_name": "South Morang", "stop_suburb": "South Morang", "number_of_platforms": 2},
     {"stop_id": 1180, "stop_name": "South Yarra", "stop_suburb": "South Yarra", "number_of_platforms": 6, "interchange": true},
-    {"stop_id": 1181, "stop_name": "Southern Cross", "stop_suburb": "Melbourne City", "number_of_platforms": 16},
+    {"stop_id": 1181, "stop_name": "Southern Cross", "stop_suburb": "Melbourne City", "number_of_platforms": 16, "interchange": true},
     {"stop_id": 1001, "stop_name": "Southland", "stop_suburb": "Cheltenham", "number_of_platforms": 2},
     {"stop_id": 1182, "stop_name": "Spotswood", "stop_suburb": "Spotswood", "number_of_platforms": 2},
     {"stop_id": 1183, "stop_name": "Springvale", "stop_suburb": "Springvale", "number_of_platforms": 2},
