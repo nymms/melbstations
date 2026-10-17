@@ -312,6 +312,21 @@
         -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:black;stroke-width:12px;"/></svg>');
     }
 
+    .next-station.continuing {
+        min-height: 1lh;
+    }
+
+    .next-station.continuing .station-text {
+        color: #707372;
+        font-size: 24px;
+        font-weight: 200;
+    }
+
+    .next-station.continuing::before,
+    .next-station.continuing::after {
+        content: none;
+    }
+        
     .next-station.interchange::after {
         content: '';
         position: absolute;
@@ -877,7 +892,14 @@
                 return null;
             }
         };  
-
+        
+        // The board holds 40 stations (4 columns of 10). With more than 40, slot 8 of
+        // column 4 shows a message and slots 9 and 10 show the last two stops.
+        const MAX_SLOTS = 40;
+        const MESSAGE_FIRST_SLOT = 37;   // slot 8 of column 4, counting from 0
+        const MESSAGE_LINES = ['Continuing to'];
+        const TAIL_STOPS = 2;
+        
         const calculateColumnDistribution = (numStops) => {
             if (numStops <= 7) {
                 return { columns: 1, distribution: [numStops] };
@@ -1107,7 +1129,8 @@
             
             // Calculate total stops to display (city + suburban route segment)
             const totalStops = cityStops.length + routeSegment.length;
-            const { columns: numColumns, distribution } = calculateColumnDistribution(totalStops);
+            const needsMessage = totalStops > MAX_SLOTS;
+            const { columns: numColumns, distribution } = calculateColumnDistribution(needsMessage ? MAX_SLOTS : totalStops);
             
             // Create columns
             for (let i = 0; i < numColumns; i++) {
@@ -1121,11 +1144,28 @@
             
             // Populate all stations (city + suburban with skipped)
             let stationIndex = 0;
+            let slot = 0;
             
             for (let colIndex = 0; colIndex < numColumns; colIndex++) {
                 const stationsInThisColumn = distribution[colIndex];
                 
                 for (let i = 0; i < stationsInThisColumn && stationIndex < totalStops; i++) {
+                    // Too many stations: show the message in the message slots, then jump to the last stops
+                    if (needsMessage && slot >= MESSAGE_FIRST_SLOT && slot < MESSAGE_FIRST_SLOT + MESSAGE_LINES.length) {
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = 'next-station continuing route-color';
+                        const messageText = document.createElement('span');
+                        messageText.className = 'station-text';
+                        messageText.textContent = MESSAGE_LINES[slot - MESSAGE_FIRST_SLOT];
+                        messageDiv.appendChild(messageText);
+                        columns[colIndex].appendChild(messageDiv);
+                        slot++;
+                        continue;
+                    }
+                    if (needsMessage && slot === MESSAGE_FIRST_SLOT + MESSAGE_LINES.length) {
+                        stationIndex = totalStops - TAIL_STOPS;
+                    }
+
                     let stationDiv, stationText;
                     
                     // First, render city stops (if any)
@@ -1163,6 +1203,7 @@
                     columns[colIndex].appendChild(stationDiv);
                     
                     stationIndex++;
+                    slot++;
                 }
             }
             
@@ -1173,7 +1214,8 @@
         // Fallback function for when no route order data available
         const populateActualStopsOnly = (stopsToShow, finalStopId) => {
             const stationsList = document.querySelector('.stations-list');
-            const { columns: numColumns, distribution } = calculateColumnDistribution(stopsToShow.length);
+            const needsMessage = stopsToShow.length > MAX_SLOTS;
+            const { columns: numColumns, distribution } = calculateColumnDistribution(needsMessage ? MAX_SLOTS : stopsToShow.length);
             
             for (let i = 0; i < numColumns; i++) {
                 const column = document.createElement('div');
@@ -1184,10 +1226,27 @@
             const columns = stationsList.querySelectorAll('.stations-column');
             
             let stationIndex = 0;
+            let slot = 0;
             for (let colIndex = 0; colIndex < numColumns; colIndex++) {
                 const stationsInThisColumn = distribution[colIndex];
                 
                 for (let i = 0; i < stationsInThisColumn && stationIndex < stopsToShow.length; i++) {
+                    // Too many stations: show the message in the message slots, then jump to the last stops
+                    if (needsMessage && slot >= MESSAGE_FIRST_SLOT && slot < MESSAGE_FIRST_SLOT + MESSAGE_LINES.length) {
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = 'next-station continuing route-color';
+                        const messageText = document.createElement('span');
+                        messageText.className = 'station-text';
+                        messageText.textContent = MESSAGE_LINES[slot - MESSAGE_FIRST_SLOT];
+                        messageDiv.appendChild(messageText);
+                        columns[colIndex].appendChild(messageDiv);
+                        slot++;
+                        continue;
+                    }
+                    if (needsMessage && slot === MESSAGE_FIRST_SLOT + MESSAGE_LINES.length) {
+                        stationIndex = stopsToShow.length - TAIL_STOPS;
+                    }
+
                     const stop = stopsToShow[stationIndex];
                     const stationDiv = document.createElement('div');
                     stationDiv.className = 'next-station route-color';
@@ -1204,6 +1263,7 @@
                     columns[colIndex].appendChild(stationDiv);
                     
                     stationIndex++;
+                    slot++;
                 }
             }
         };
