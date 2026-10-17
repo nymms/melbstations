@@ -311,6 +311,19 @@
         -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:black;stroke-width:12px;"/></svg>');
     }
 
+    .next-station.interchange::after {
+        content: '';
+        position: absolute;
+        left: -17px;
+        top: 70%;
+        transform: translate(0, -50%);
+        width: 30px;
+        height: 30px;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="20" y="20" width="60" height="30" rx="15" ry="15" fill="%23ffffff" stroke="%23000000" stroke-width="1"/></svg>');
+        background-repeat: no-repeat;
+        background-size: contain;
+    }
+
     .next-station.skipped ~ .next-station.skipped:before {
         content: none;
     }
@@ -784,6 +797,12 @@
             return station ? station.stop_name : `Stop ${stopId}`;
         };
 
+        const isInterchangeStation = (stopId) => {
+            if (!stationsData) return false;
+            const station = stationsData.find(s => s.stop_id === stopId);
+            return station ? station.interchange === true : false;
+        };
+        
         const populateStationDropdown = () => {
             const select = document.getElementById('stationSelect');
             if (stationsData) {
@@ -1113,7 +1132,8 @@
                         stationDiv.className = 'next-station route-color';
                         
                         if (stationIndex === 0) stationDiv.classList.add('current');
-                        
+                        if (isInterchangeStation(cityStop.stop_id)) stationDiv.classList.add('interchange');
+
                         stationText = document.createElement('span');
                         stationText.className = 'station-text';
                         stationText.textContent = getStationName(cityStop.stop_id);
@@ -1129,7 +1149,8 @@
                         
                         if (stationIndex === 0) stationDiv.classList.add('current');
                         if (routeStop.stop_id === finalStopId) stationDiv.classList.add('last-station');
-                        
+                        if (isInterchangeStation(routeStop.stop_id)) stationDiv.classList.add('interchange');
+ 
                         stationText = document.createElement('span');
                         stationText.className = 'station-text';
                         stationText.textContent = getStationName(routeStop.stop_id);
@@ -1170,7 +1191,8 @@
                     
                     if (stationIndex === 0) stationDiv.classList.add('current');
                     if (stop.stop_id === finalStopId) stationDiv.classList.add('last-station');
-                    
+                    if (isInterchangeStation(stop.stop_id)) stationDiv.classList.add('interchange');
+
                     const stationText = document.createElement('span');
                     stationText.className = 'station-text';
                     stationText.textContent = getStationName(stop.stop_id);
