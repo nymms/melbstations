@@ -943,7 +943,7 @@
             let baseText = "Stopping all stations";
             
             if (expressInfo && expressInfo.isExpress) {
-                baseText = "Express service";
+                baseText = "Express";
             } else if (expressInfo && expressInfo.singleSkip) {
                 const skippedStationName = getStationName(expressInfo.singleSkip.stop_id);
                 baseText = `Stopping all stations except ${skippedStationName}`;
