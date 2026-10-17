@@ -897,9 +897,9 @@
         // The board holds 40 stations (4 columns of 10). With more than 40, slot 8 of
         // column 4 shows a message and slots 9 and 10 show the last two stops.
         const MAX_SLOTS = 40;
-        const MESSAGE_FIRST_SLOT = 37;   // slot 8 of column 4, counting from 0
+        const MESSAGE_FIRST_SLOT = 36;   // slot 8 of column 4, counting from 0
         const MESSAGE_LINES = ['... continuing to'];
-        const TAIL_STOPS = 2;
+        const TAIL_STOPS = 1;
         
         const calculateColumnDistribution = (numStops) => {
             if (numStops <= 7) {
