@@ -122,7 +122,7 @@
     {"stop_id": 1222, "stop_name": "Lynbrook", "stop_suburb": "Lynbrook", "number_of_platforms": 2},
     {"stop_id": 1116, "stop_name": "Macaulay", "stop_suburb": "North Melbourne", "number_of_platforms": 2},
     {"stop_id": 1117, "stop_name": "Macleod", "stop_suburb": "Macleod", "number_of_platforms": 2},
-    {"stop_id": 1118, "stop_name": "Malvern", "stop_suburb": "Malvern", "number_of_platforms": 4},
+    {"stop_id": 1118, "stop_name": "Malvern", "stop_suburb": "Malvern", "number_of_platforms": 4, "interchange": true},
     {"stop_id": 1119, "stop_name": "McKinnon", "stop_suburb": "Mckinnon", "number_of_platforms": 2},
     {"stop_id": 1120, "stop_name": "Melbourne Central", "stop_suburb": "Melbourne City", "number_of_platforms": 4, "interchange": true},
     {"stop_id": 1122, "stop_name": "Mentone", "stop_suburb": "Mentone", "number_of_platforms": 2},
