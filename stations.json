@@ -73,7 +73,7 @@
     {"stop_id": 1068, "stop_name": "Flagstaff", "stop_suburb": "Melbourne City", "number_of_platforms": 4, "interchange": true},
     {"stop_id": 1069, "stop_name": "Flemington Bridge", "stop_suburb": "North Melbourne", "number_of_platforms": 2},
     {"stop_id": 1070, "stop_name": "Flemington Racecourse", "stop_suburb": "Flemington", "number_of_platforms": 2},
-    {"stop_id": 1071, "stop_name": "Flinders Street", "stop_suburb": "Melbourne City", "number_of_platforms": 13, "interchange": true},
+    {"stop_id": 1071, "stop_name": "Flinders Street", "stop_suburb": "Melbourne City", "number_of_platforms": 14, "interchange": true},
     {"stop_id": 1072, "stop_name": "Footscray", "stop_suburb": "Footscray", "number_of_platforms": 6, "interchange": true},
     {"stop_id": 1073, "stop_name": "Frankston", "stop_suburb": "Frankston", "number_of_platforms": 3, "interchange": true},
     {"stop_id": 1074, "stop_name": "Gardenvale", "stop_suburb": "Brighton", "number_of_platforms": 2},
