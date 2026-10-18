@@ -323,10 +323,20 @@
         padding-left: 10px;
     }
 
-    .next-station.continuing::before,
-    .next-station.continuing::after {
+    .next-station.continuing::before {
         content: none;
     }
+    .next-station.continuing::after {
+        content: '◼︎';
+        font-weight: 900;
+        font-size: 12px;
+        position: absolute;
+        left: -18px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 16px;
+        height: 16px;
+        color: #000;
         
     .next-station.interchange::after {
         content: '';
