@@ -215,7 +215,7 @@
     }
 
     .hidden-pin-toggle:checked ~ #settings-panel,
-    .station-board:is(:hover, .revealed) .hidden-pin-toggle:not(:checked) ~ #settings-panel {
+    .station-board:is(:not(.touch-mode):hover, .revealed) .hidden-pin-toggle:not(:checked) ~ #settings-panel {
         margin-top: 0 !important;
     }
 
@@ -504,12 +504,12 @@
         transition: fill 0.3s ease;
     }
 
-    .station-board:is(:hover, .revealed) .hidden-pin-toggle:not(:checked) ~ .pin-button ~ .header-and-platform-wrapper,
-    .station-board:is(:hover, .revealed) .hidden-pin-toggle:not(:checked) ~ .pin-button {
+    .station-board:is(:not(.touch-mode):hover, .revealed) .hidden-pin-toggle:not(:checked) ~ .pin-button ~ .header-and-platform-wrapper,
+    .station-board:is(:not(.touch-mode):hover, .revealed) .hidden-pin-toggle:not(:checked) ~ .pin-button {
         margin-top: 0 !important;
     }
 
-    .station-board:is(:hover, .revealed) .settings.visible,
+    .station-board:is(:not(.touch-mode):hover, .revealed) .settings.visible,
     .hidden-pin-toggle:checked ~ .settings.visible {
         opacity: 1;
         visibility: visible;
@@ -1306,18 +1306,41 @@
         };
 
         // --- settings toggle ---
-        // Touch screens have no hover, so tapping the board reveals the header and controls for a few seconds.
-        // While the settings are open the board stays revealed.
+         // A mouse reveals the header by hovering (CSS does that). A finger has no hover, so a tap reveals
+        // the header and controls, and they hide again 4 seconds after the last touch.
         let revealTimer = null;
-        const REVEAL_SECONDS = 8;
+        let extraWaits = 0;
+        const REVEAL_SECONDS = 4;
+        const hideControls = () => {
+            // Give a dropdown that is still open a little longer (up to 6 extra seconds)
+            if (settingsPanel.contains(document.activeElement) && extraWaits < 3) {
+                extraWaits++;
+                revealTimer = setTimeout(hideControls, 2000);
+                return;
+            }
+            extraWaits = 0;
+            stationBoardElement.classList.remove('revealed');
+            settingsPanel.classList.remove('visible');
+            settingsButton.setAttribute('aria-expanded', 'false');
+        };
         const reveal = () => {
+            if (!stationBoardElement.classList.contains('touch-mode')) return;   // a mouse: hover looks after it
+            extraWaits = 0;
             stationBoardElement.classList.add('revealed');
             clearTimeout(revealTimer);
-            if (!settingsPanel.classList.contains('visible')) {
-                revealTimer = setTimeout(() => stationBoardElement.classList.remove('revealed'), REVEAL_SECONDS * 1000);
-            }
+            revealTimer = setTimeout(hideControls, REVEAL_SECONDS * 1000);
         };
-        stationBoardElement.addEventListener('pointerdown', reveal);
+        stationBoardElement.addEventListener('pointerdown', (e) => {
+            const touch = e.pointerType !== 'mouse';
+            stationBoardElement.classList.toggle('touch-mode', touch);   // touch mode switches CSS hover off (iPad Safari keeps it stuck)
+            if (!touch) {
+                clearTimeout(revealTimer);
+                stationBoardElement.classList.remove('revealed');
+            }
+            reveal();
+        }, true);
+        settingsPanel.addEventListener('change', reveal);
+        settingsPanel.addEventListener('focusin', reveal);
 
         const toggleSettings = () => {
             const isVisible = settingsPanel.classList.toggle('visible');            
