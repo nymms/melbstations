@@ -215,7 +215,7 @@
     }
 
     .hidden-pin-toggle:checked ~ #settings-panel,
-    .station-board:hover .hidden-pin-toggle:not(:checked) ~ #settings-panel {
+    .station-board:is(:hover, .revealed) .hidden-pin-toggle:not(:checked) ~ #settings-panel {
         margin-top: 0 !important;
     }
 
@@ -473,6 +473,7 @@
         padding: 2px;
         border: 1px solid #ccc;
         border-radius: 3px;
+        font-size: 16px;
     }
 
     #settingsButton {
@@ -503,12 +504,13 @@
         transition: fill 0.3s ease;
     }
 
-    .station-board:hover .hidden-pin-toggle:not(:checked) ~ .pin-button ~ .header-and-platform-wrapper,
-    .station-board:hover .hidden-pin-toggle:not(:checked) ~ .pin-button {
+    .station-board:is(:hover, .revealed) .hidden-pin-toggle:not(:checked) ~ .pin-button ~ .header-and-platform-wrapper,
+    .station-board:is(:hover, .revealed) .hidden-pin-toggle:not(:checked) ~ .pin-button {
         margin-top: 0 !important;
     }
 
-    .station-board:hover .settings.visible {
+    .station-board:is(:hover, .revealed) .settings.visible,
+    .hidden-pin-toggle:checked ~ .settings.visible {
         opacity: 1;
         visibility: visible;
     }
@@ -1304,11 +1306,25 @@
         };
 
         // --- settings toggle ---
+        // Touch screens have no hover, so tapping the board reveals the header and controls for a few seconds.
+        // While the settings are open the board stays revealed.
+        let revealTimer = null;
+        const REVEAL_SECONDS = 8;
+        const reveal = () => {
+            stationBoardElement.classList.add('revealed');
+            clearTimeout(revealTimer);
+            if (!settingsPanel.classList.contains('visible')) {
+                revealTimer = setTimeout(() => stationBoardElement.classList.remove('revealed'), REVEAL_SECONDS * 1000);
+            }
+        };
+        stationBoardElement.addEventListener('pointerdown', reveal);
+
         const toggleSettings = () => {
             const isVisible = settingsPanel.classList.toggle('visible');            
             settingsButton.setAttribute('aria-expanded', isVisible);            
             // Change the SVG color to indicate it's open/closed
             const svgPath = settingsButton.querySelector('svg path:nth-child(1)');
+            reveal();
         };
 
         const updateBoard = async () => {
