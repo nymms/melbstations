@@ -325,21 +325,29 @@
     }
 
     .next-station.continuing::before {
-        content: none;
-        
-    }
-    .next-station.continuing::after {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 25px;
-        height: 25px;
-        background-color: var(--route-bg-color, #95979A);
+        top: 0.3lh;
+        left: -6;
+        width: 50px;
+        height: 50px;
+        background-color:#fff;
         z-index: 1;
         mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
         -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-    
+    }
+        
+    .next-station.continuing::after {
+        content: '';
+        position: absolute;
+        top: 0.6lh;
+        left: -6;
+        width: 50px;
+        height: 50px;
+        background-color:#fff;
+        z-index: 1;
+        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
+        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
     }
         
     .next-station.interchange::after {
