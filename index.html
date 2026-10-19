@@ -731,8 +731,10 @@
         const settingsButton = document.getElementById('settingsButton');
         const settingsPanel = document.getElementById('settings-panel');
         
-        let currentStopId = 1127;
-        let currentPlatform = "1";
+        // The web address can choose the station and platform, for example ?stop=1187&platform=1
+        const addressParams = new URLSearchParams(window.location.search);
+        let currentStopId = parseInt(addressParams.get('stop')) || 1127;
+        let currentPlatform = addressParams.get('platform') || "1";
         let currentRunId = null;
         let isUserChange = false;
 
@@ -856,6 +858,14 @@
             const station = stationsData.find(s => s.stop_id === stopId);
             return station ? station.interchange === true : false;
         };
+
+         // Keep the station and platform in the web address, so adding the page to the Home Screen opens straight to it
+        const updateAddress = () => {
+            const params = new URLSearchParams();
+            params.set('stop', currentStopId);
+            if (currentPlatform) params.set('platform', currentPlatform);
+            history.replaceState(null, '', '?' + params.toString());
+        };
         
         const populateStationDropdown = () => {
             const select = document.getElementById('stationSelect');
@@ -875,6 +885,7 @@
                         isUserChange = true;  // ADD THIS
                         hideFutureDepartures();  // ADD THIS - blank immediately
                         updatePlatformDropdown();
+                        updateAddress();
                         updateBoard();
                     }
                 });
@@ -882,6 +893,7 @@
                 const platformSelect = document.getElementById('platformSelect');
                 platformSelect.addEventListener('change', (e) => {
                     currentPlatform = e.target.value;
+                    updateAddress();
                     isUserChange = true;
                     hideFutureDepartures(); 
                     updateBoard();
@@ -889,7 +901,7 @@
             }
         };
 
-        const updatePlatformDropdown = () => {
+        const updatePlatformDropdown = (wantedPlatform) => {
             const select = document.getElementById('platformSelect');
             const station = stationsData.find(s => s.stop_id === currentStopId);
             const platformCount = station ? station.number_of_platforms : 2;
@@ -903,7 +915,9 @@
                 select.appendChild(option);
             }
             
-            select.value = platformCount >= 1 ? "1" : "";
+            // Keep the platform asked for (for example from the address) if this station has it, otherwise platform 1
+            const wanted = parseInt(wantedPlatform);
+            select.value = (wanted >= 1 && wanted <= platformCount) ? String(wanted) : (platformCount >= 1 ? "1" : "");
             currentPlatform = select.value;
         };
 
@@ -1622,8 +1636,13 @@
         };
 
         Promise.all([loadStations(), loadRouteOrder()]).then(() => {
+            // If the address asked for a station that doesn't exist, fall back to the default
+            if (!stationsData.some(s => s.stop_id === currentStopId)) {
+                currentStopId = 1127;
+                currentPlatform = "1";
+            }
             populateStationDropdown();
-            updatePlatformDropdown();
+            updatePlatformDropdown(currentPlatform);
             updateBoard();
             updateFutureDepartures();  // Load immediately, no delay
             
