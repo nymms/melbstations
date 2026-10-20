@@ -1332,7 +1332,7 @@
             const now = new Date();
             const diffMinutes = Math.floor((departureTime - now) / 60000);
             
-            if (diffMinutes < 1) return "Now";
+            if (diffMinutes < 1) return "NOW";
             if (diffMinutes < 60) return `${diffMinutes} min`;
             const hours = Math.floor(diffMinutes / 60);
             const mins = diffMinutes % 60;
