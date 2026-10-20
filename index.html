@@ -21,6 +21,7 @@
     body {
         background-color: #000000;
         font-family: 'Network Sans 2019', Arial, sans-serif;
+        -webkit-text-size-adjust: 100%;
     }
 
     @font-face {
@@ -618,7 +619,17 @@
     .time-info.future {
         margin-top: 0px;
     }
+
+    /*  Prevent iOS text inflation heuristics */
+    .departure-time, .destination, .duration, 
+    .departure-time.future, .destination.future, .duration.future {
+        line-height: 1; /* Forces the line box to match the exact font size, eliminating extra padding */
+    }
         
+    .time-destination, .time-info, .time-destination.future, .time-info.future {
+        align-items: baseline; /* Ensures consistent baseline matching across platforms */
+    }
+    
     </style>
 </head>
 <body>
