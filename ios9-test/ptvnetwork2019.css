@@ -1,0 +1,24 @@
+/* 2025 Network Sans 2019 */
+#headerPlatform {
+        font-size: 90px;
+        font-weight: 500;
+        padding: 14px 12px 4px 4px;
+        border-radius: 0 8px 24px 0;
+        width: 120px;
+        height: 144px;
+    }
+
+.station-header {
+        background-color: #FFF;
+        padding: 18px 12px 0px 0px;
+        border-radius: 8px 0px 0px 24px;
+        height: 144px
+    }
+
+.station-name {
+        font-weight: 600;
+        text-align: center;
+        color: #333434;
+        margin: 0 12px;
+        border-top: 16px solid #0072CE;
+    }

@@ -1,0 +1,26 @@
+/* 2020 3.01 */
+#headerPlatform {
+        font-family: 'HelveticaNeue-Light';
+        font-size: 150px;
+        line-height: 0.8;        
+        padding: 4px;
+        border-radius: 0 8px 8px 0;
+        width: 150px;
+        height: 140px;
+    }
+
+.station-header {
+        background-color: #0072CE;
+        padding: 12px 0px;
+        text-align: right;
+        border-radius: 8px 0px 0px 8px; 
+        }
+
+.station-name {
+        font-family: 'Helvetica Neue';
+        font-weight: 400;
+        color: #FFF;
+        padding-right: 16px;
+        border-bottom: 2px solid #FFF;
+        margin-bottom: 15px;
+    }
