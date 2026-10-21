@@ -674,7 +674,7 @@
         var isUserChange = false;
 
         var getDepartureApiUrl = function() {
-            var baseUrl = 'https://melbptboard-opt.onrender.com/api/next-departure?stop_id=' + currentStopId;
+            var baseUrl = 'http://192.168.1.40:8080/api/next-departure?stop_id=' + currentStopId;
             return currentPlatform ? baseUrl + '&platform=' + currentPlatform : baseUrl;
         };
         
