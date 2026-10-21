@@ -693,9 +693,18 @@
                             if (errorCallback) errorCallback(e);
                         }
                     } else {
+                        // FORCE THE ERROR TO SHOW ON THE SCREEN FOR THE IPAD
+                        var errText = 'XHR Error: status ' + xhr.status;
+                        document.getElementById('lastUpdated').textContent = errText;
+                        document.querySelector('.station-name').textContent = errText;
                         if (errorCallback) errorCallback({ status: xhr.status });
                     }
                 }
+            };
+            xhr.onerror = function() {
+                // Catches silent network / SSL handshake drops
+                document.getElementById('lastUpdated').textContent = 'Network/SSL Fail (TLS mismatch)';
+                document.querySelector('.station-name').textContent = 'Network/SSL Fail';
             };
             xhr.send();
         }
