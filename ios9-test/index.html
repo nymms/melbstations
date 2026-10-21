@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="ptvnetwork2019.css" id="header-link">
     <title>Melb PT Departure Board</title>
     <style>
+
     * {
         margin: 0;
         padding: 0;
@@ -18,47 +19,66 @@
     body {
         background-color: #000000;
         font-family: 'Network Sans 2019', Arial, sans-serif;
+        -webkit-text-size-adjust: 99%;
     }
 
     @font-face {
         font-family: 'Network Sans 2019';
-        src: url('https://raw.githubusercontent.com/nymms/melbstations/main/NETWORKSANS-2019-REGULAR.TTF') format('truetype');
+        src: url('NETWORKSANS-2019-REGULAR.TTF') format('truetype');
         font-weight: normal;
         font-style: normal;
+        font-display: swap;
     }
 
     @font-face {
         font-family: 'Network Sans 2019';
-        src: url('https://raw.githubusercontent.com/nymms/melbstations/main/NETWORKSANS-2019-MEDIUM.TTF') format('truetype');
+        src: url('NETWORKSANS-2019-MEDIUM.TTF') format('truetype');
         font-weight: 600;
         font-style: normal;
+        font-display: swap;
     }
 
     @font-face {
         font-family: 'Network Sans 2019';
-        src: url('https://raw.githubusercontent.com/nymms/melbstations/main/NETWORKSANS-2019-BOLD.TTF') format('truetype');
+        src: url('NETWORKSANS-2019-BOLD.TTF') format('truetype');
         font-weight: 800;
         font-style: normal;
+        font-display: swap;
     }
 
     @font-face {
         font-family: 'Network Sans 2019';
-        src: url('https://raw.githubusercontent.com/nymms/melbstations/main/NETWORKSANS-2019-LIGHT.TTF') format('truetype');
+        src: url('NETWORKSANS-2019-LIGHT.TTF') format('truetype');
         font-weight: 200;
         font-style: normal;
+        font-display: swap;
     }
 
     .station-board {
-        width: 1280px;
+        width: 1024px;
         overflow: hidden;
         margin: 0 auto;
         position: relative;
         left: 0;
     }
 
+    .alert-icon {
+        width: 32px;
+        height: 32px;
+        background-color: #FE5000;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 900;
+        font-size: 24px;
+    }
+
     .clock {
-        font-size: 38px;
-        width: 300px;
+        font-size: 36px;
+        font-variant-numeric: tabular-nums;
+        width: 280px;
         height: 120px;
         display: flex;
         align-items: center;
@@ -68,31 +88,35 @@
 
     .delay-indicator {
         color: #FE5000;
-        font-size: 56px;
+        font-size: 52px;
         font-weight: bold;
+        margin-right: 16px;
     }
 
     .delay-indicator.future {
-        font-size: 28px;
+        font-size: 24px;
+        margin-right: 12px;
     }
 
     .departure-container {
-        margin-top: 0px;
+        transition: margin-top 0.5s ease-out;
+        margin-top: -2px;
         height: 720px;
     }
 
     .departure-header {
-        padding: 10px 20px 0px 25px;
+        padding: 25px 20px 0px 25px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-top: 25px solid #95979A;
+        border-top: 25px solid;
+        border-top-color: var(--route-bg-color, #95979A); /* Explicitly set border-top-color */
         height: 90px;
     }
         
     .departure-header .platform {
-        background-color: #95979A;
-        color: #000000;
+        background-color: var(--route-bg-color, #95979A);
+        color: var(--route-text-color, #000000);
         padding: 8px;
         font-size: 28px;
         font-weight: 900;
@@ -107,17 +131,12 @@
         margin-bottom: 5px;
         height: initial;
         border-top: none;
-        border-left: 6px solid #95979A;
+        border-left: 6px solid var(--route-bg-color, #95979A);
     }
 
     .departure-item {
         margin: 0 auto 0 auto;
         overflow: hidden;
-    }
-
-    .departure-item.has-no-trains .departure-header,
-    .departure-item.has-no-trains .next-stations {
-        border: none;
     }
 
     .departure-item.future {
@@ -127,43 +146,46 @@
     }
 
     .departure-time {
-        font-size: 60px;
+        font-size: 56px;
         font-family: 'Network Sans 2019', Arial, sans-serif;
         font-weight: 200;
     }
 
     .departure-time.future {
-        font-size: 30px;
+        font-size: 26px;
     }
 
     .departurestack {
         width: 75%;
+        margin-left: 5px;
     }
 
     .destination {
-        font-size: 72px;
+        font-size: 64px;
         font-family: 'Network Sans 2019', Arial, sans-serif;
         font-weight: 600;
     }
 
     .destination.future {
-        font-size: 30px;
+        font-size: 28px;
         font-weight: 600;
+        padding-left: 10px;
     }
 
     .duration {
         padding: 4px;
-        font-size: 60px;
+        font-size: 56px;
         font-weight: normal;
-        min-width: 260px;
+        min-width: 240px;
         text-align: center;
         height: 80px;
+        line-height: 1.2;
     }
 
     .duration.future {
-        font-size: 30px;
+        font-size: 28px;
         font-weight: 800;
-        min-width: 135px;
+        min-width: 130px;
         height: 42px;
         padding: 2px;
     }
@@ -171,8 +193,18 @@
     .header-and-platform-wrapper {
         display: flex;
         align-items: flex-start;
-        min-height: 130px;
-        margin-top: -142px;
+        min-height: 125px;
+        transition: margin-top 0.3s ease-out;
+        /* Pulls the header up off the screen by default */
+        margin-top: -194px;
+    }
+
+    /* Slides both down into view when revealed or pinned */
+    .station-board.revealed .header-and-platform-wrapper,
+    .station-board.revealed .pin-button,
+    .hidden-pin-toggle:checked ~ .pin-button ~ .header-and-platform-wrapper,
+    .hidden-pin-toggle:checked ~ .pin-button {
+        margin-top: 0 !important;
     }
 
     .hidden-pin-toggle {
@@ -185,8 +217,7 @@
     }
 
     .hidden-pin-toggle:checked ~ #settings-panel,
-    .station-board:not(.touch-mode):hover .hidden-pin-toggle:not(:checked) ~ #settings-panel,
-    .station-board.revealed .hidden-pin-toggle:not(:checked) ~ #settings-panel {
+    .station-board:is(:not(.touch-mode):hover, .revealed) .hidden-pin-toggle:not(:checked) ~ #settings-panel {
         margin-top: 0 !important;
     }
 
@@ -201,17 +232,16 @@
     .last-updated {
         font-size: 8px;
         padding: 2px;
-        color: #ffffff;
     }
 
     .next-station {
-        font-size: 30px;
+        font-size: 26px;
         font-weight: normal;
         padding-left: 18px;
         position: relative;
         display: flex;
         align-items: center;
-        border-left: 6px solid #95979A;
+        border-left: 6px solid var(--route-bg-color, #95979A);
     }
 
     .next-station::before {
@@ -224,26 +254,22 @@
         transform: translateY(-50%);
         width: 16px;
         height: 16px;
-        color: #95979A;
+        color: var(--route-bg-color, #95979A);
     }
 
     .next-station.current {
-        border-left: 6px solid #95979A;
+        border-left: 6px solid var(--route-bg-color, #95979A);
     }
 
     .next-station.current .station-text {
         padding: 4px 6px;
-        background-color: #95979A;
-        color: #000000;
+        background-color: var(--route-bg-color, #95979A);
+        color: var(--route-text-color, #95979A);
     }
 
     .next-station.last-station {
         border-left: none !important;
         padding-left: 25px;
-    }
-
-    .next-station.last-station::after {
-        display: none !important;
     }
 
     .next-station.last-station::before {
@@ -254,7 +280,7 @@
         top: 8px;
         width: 25px;
         height: 25px;
-        background-color: #95979A;
+        background-color: var(--route-bg-color, #95979A);
         mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="20" y1="75" x2="80" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="50" y1="0" x2="50" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
         -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="20" y1="75" x2="80" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="50" y1="0" x2="50" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
     }
@@ -267,25 +293,32 @@
         transform: translate(0, -50%);
         width: 30px;
         height: 30px;
-        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:white;stroke-width:8px;"/></svg>');
-        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:white;stroke-width:8px;"/></svg>');
+        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:white;stroke-width:15px;"/></svg>');
+        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:white;stroke-width:15px;"/></svg>');
     }
 
     .next-station.skipped::after {
         content: '';
         position: absolute;
-        left: -10px;
-        top: 75%;
+        left: -14px;
+        top: 85%;
         transform: translate(0, -50%);
-        width: 30px;
-        height: 30px;
-        background-color: #95979A;
+        width: 45px;
+        height: 45px;
+        background-color: var(--route-bg-color, #95979A);
         mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:black;stroke-width:12px;"/></svg>');
         -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M4.172,11.07L23.998,33.89L43.828,11.07" style="fill:none;stroke:black;stroke-width:12px;"/></svg>');
     }
 
+    /* iOS 9 Safari Fix: Hide indicators for any skipped station that follows another skipped station */
+    .next-station.skipped ~ .next-station.skipped:before,
+    .next-station.skipped ~ .next-station.skipped:after {
+        display: none !important;
+        content: "" !important;
+    }
+
     .next-station.continuing {
-        min-height: 2em;
+        min-height: 2lh;
     }
 
     .next-station.continuing .station-text {
@@ -294,39 +327,6 @@
         font-weight: 200;
         font-style: italic;
         padding-left: 10px;
-    }
-
-    .next-station.continuing::before,
-    .next-station.continuing::after {
-        content: '';
-        position: absolute;
-        left: -6px;
-        width: 50px;
-        height: 50px;
-        background-color: #fff;
-        z-index: 1;
-        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-    }
-    .next-station.continuing::before { top: 2em; }
-    .next-station.continuing::after { top: 1em; }
-
-    .next-station.interchange::after {
-        content: '';
-        position: absolute;
-        left: -17px;
-        top: 70%;
-        transform: translate(0, -50%);
-        width: 30px;
-        height: 30px;
-        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="10" y="10" width="80" height="40" rx="20" ry="20" fill="%23ffffff" stroke="%23000000" stroke-width="8"/></svg>');
-        background-repeat: no-repeat;
-        background-size: contain;
-    }
-
-    .next-station.skipped ~ .next-station.skipped:before,
-    .next-station.skipped ~ .next-station.skipped:after {
-        content: none;
     }
 
     .next-stations {
@@ -341,7 +341,6 @@
         font-weight: 600;
         text-align: center;
         top: 50px;
-        color: #ffffff;
     }
 
     .otherdepartures {
@@ -350,19 +349,21 @@
 
     .pin-button {
         position: absolute;
-        top: 170px;
+        top: 150px;
         left: -5px;
         cursor: pointer;
         z-index: 1002;
         padding: 5px;
         border-radius: 50%;
-        margin-top: -142px;
+        transition: margin-top 0.3s ease-out;
+        /* Pulls the pin button up with the header */
+        margin-top: -155px;
     }
 
     .pin-button svg {
         width: 24px;
         height: 24px;
-        fill: #333434;
+        fill: #707372;
         transition: transform 0.3s ease-out;
     }
 
@@ -370,20 +371,28 @@
         transform: rotate(45deg);
     }
 
+    .route-bgcolor {
+        background-color: #95979A;
+        color: #000000;
+    }
+
+    .route-color {
+        color: #95979A;
+    }
+
     .route-info {
-        padding: 0px 20px 8px 25px;
-        font-size: 36px;
+        padding: 30px 20px 8px 25px;
+        font-size: 34px;
         font-weight: 200;
         justify-content: space-between;
         align-items: center;
-        height: 50px;
-        color: #ffffff;
+        height: 90px;
     }
 
     .route-info.future {
         padding: 0px;
         padding-left: 20px;
-        font-size: 24px;
+        font-size: 21px;
         justify-content: normal;
         align-items: normal;
         height: initial;
@@ -420,7 +429,7 @@
         align-items: center;
         position: absolute;
         left: 27px;
-        top: 170px;
+        top: 150px;
         z-index: 1003;
     }
 
@@ -431,23 +440,10 @@
         display: block;
     }
 
-    .station-board:not(.touch-mode):hover .hidden-pin-toggle:not(:checked) ~ .pin-button ~ .header-and-platform-wrapper,
-    .station-board.revealed .hidden-pin-toggle:not(:checked) ~ .pin-button ~ .header-and-platform-wrapper,
-    .station-board:not(.touch-mode):hover .hidden-pin-toggle:not(:checked) ~ .pin-button,
-    .station-board.revealed .hidden-pin-toggle:not(:checked) ~ .pin-button {
-        margin-top: 0 !important;
-    }
-
-    .station-board:not(.touch-mode):hover .settings.visible,
-    .station-board.revealed .settings.visible,
-    .hidden-pin-toggle:checked ~ .settings.visible {
-        opacity: 1;
-        visibility: visible;
-    }
-
     .station-header {
         width: 100%;
         box-shadow: inset 0 8px 8px -10px rgba(0, 0, 0, 0.8);
+        transition: margin-top 0.5s ease-out;
         position: relative;
         z-index: 1001;
         display: flex;
@@ -461,7 +457,6 @@
         padding-top: 16px;
         width: 100%;
         height: 100px;
-        color: #ffffff;
     }
 
     .stations-column {
@@ -471,49 +466,6 @@
         padding-top: 12px;
         background-repeat: no-repeat;
         position: relative;
-    }
-
-    .stations-column::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 25px;
-        height: 25px;
-        background-color: #95979A;
-        z-index: 1;
-        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-    }
-
-    .stations-column:first-child {
-        padding-top: 12px;
-    }
-
-    .stations-column:first-child::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 25px;
-        height: 25px;
-        background-color: #95979A;
-        z-index: 1;
-        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="0" x2="11" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="0" x2="11" y2="75" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-    }
-
-    .stations-column .next-station:last-child:not(.last-station)::after {
-        content: '';
-        position: absolute;
-        left: -6px;
-        top: 41px;
-        transform: translateY(-50%);
-        width: 25px;
-        height: 25px;
-        background-color: #95979A;
-        mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
-        -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><line x1="11" y1="8" x2="11" y2="20" stroke="black" stroke-width="22" stroke-linecap="butt"/><line x1="11" y1="28" x2="11" y2="40" stroke="black" stroke-width="22" stroke-linecap="butt"/></svg>');
     }
 
     .stations-list {
@@ -526,12 +478,14 @@
     .time-destination {
         display: flex;
         align-items: center;
-        gap: 15px;
-        color: #ffffff;
     }
 
-    .time-destination.future {
-        gap: 10px;
+    .time-destination span {
+        margin-right: 15px; /* Safely spaces them out on all versions of Safari */
+    }
+
+    .time-destination.future span {
+        margin-right: 2px; /* Safely spaces future destination items */
     }
 
     .time-info {
@@ -539,12 +493,21 @@
         display: flex;
         align-items: center;
         gap: 16px;
-        color: #ffffff;
     }
 
     .time-info.future {
         margin-top: 0px;
     }
+
+    .departure-time, .destination, 
+    .departure-time.future, .destination.future, .duration.future {
+        line-height: 1.3;
+    }
+        
+    .time-destination, .time-info, .time-destination.future, .time-info.future {
+        align-items: baseline;
+    }
+    
     </style>
 </head>
 <body>
@@ -557,7 +520,7 @@
         </label>
         <div class="header-and-platform-wrapper">
             <div class="station-header">
-                <div class="station-name">Loading...</div>
+                <div class="station-name"></div>
                 <button id="settingsButton" aria-expanded="false" aria-controls="settings-panel" title="Toggle Settings">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
                         <path id="gearOutline" d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" fill="#333434" />
@@ -587,7 +550,7 @@
         </div>
         <div class="departure-container">
             <div class="departure-item" style="display: block;">
-               <div class="departure-header" id="mainHeader">
+               <div class="departure-header">
                    <div class="time-destination">
                      <span class="departure-time"></span>
                      <span class="destination"></span>
@@ -631,13 +594,14 @@
                         </div>
                     </div>
                 </div>
-                <div class="clock"><span id="live-clock" style="color:#ffffff;"></span></div>
+                <div class="clock"><span id="live-clock"></span></div>
             </div>
         </div>
         <div class="last-updated" id="lastUpdated">Loading...</div>
     </div>
 
-    <script>
+    <script type="text/javascript">
+    // STRICT ES5 JAVASCRIPT FOR iOS 9 SAFARI COMPATIBILITY (INCLUDING FULL STATION GRIDS & FUTURE DEPARTURES)
     document.addEventListener('DOMContentLoaded', function() {
         var departureItem = document.querySelector('.departure-item');
         var destinationElement = document.querySelector('.destination');
@@ -653,61 +617,30 @@
         var stationBoardElement = document.querySelector('.station-board');
         var settingsButton = document.getElementById('settingsButton');
         var settingsPanel = document.getElementById('settings-panel');
-        var mainHeader = document.getElementById('mainHeader');
         
-        function getQueryParams() {
-            var params = {};
-            var search = window.location.search.substring(1);
-            if (!search) return params;
-            var hashes = search.split('&');
-            for (var i = 0; i < hashes.length; i++) {
-                var hash = hashes[i].split('=');
-                params[hash[0]] = decodeURIComponent(hash[1]);
-            }
-            return params;
-        }
-
-        var addressParams = getQueryParams();
-        var currentStopId = parseInt(addressParams['stop']) || 1127;
-        var currentPlatform = addressParams['platform'] || "1";
+        var currentStopId = 1127;
+        var currentPlatform = "1";
         var currentRunId = null;
         var isUserChange = false;
 
+        // Parse query parameters manually for old WebKit
+        if (window.location.search) {
+            var search = window.location.search.substring(1);
+            var pairs = search.split('&');
+            for (var i = 0; i < pairs.length; i++) {
+                var pair = pairs[i].split('=');
+                if (pair[0] === 'stop') currentStopId = parseInt(pair[1], 10) || 1127;
+                if (pair[0] === 'platform') currentPlatform = pair[1];
+            }
+        }
+
         var getDepartureApiUrl = function() {
-            var baseUrl = 'http://192.168.1.40:8080/api/next-departure?stop_id=' + currentStopId;
+            var baseUrl = '/api/next-departure?stop_id=' + currentStopId;
             return currentPlatform ? baseUrl + '&platform=' + currentPlatform : baseUrl;
         };
         
         var stationsData = null;
-
-        function apiGet(url, callback, errorCallback) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', url, true);
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4) {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        try {
-                            var data = JSON.parse(xhr.responseText);
-                            callback(data);
-                        } catch (e) {
-                            if (errorCallback) errorCallback(e);
-                        }
-                    } else {
-                        // FORCE THE ERROR TO SHOW ON THE SCREEN FOR THE IPAD
-                        var errText = 'XHR Error: status ' + xhr.status;
-                        document.getElementById('lastUpdated').textContent = errText;
-                        document.querySelector('.station-name').textContent = errText;
-                        if (errorCallback) errorCallback({ status: xhr.status });
-                    }
-                }
-            };
-            xhr.onerror = function() {
-                // Catches silent network / SSL handshake drops
-                document.getElementById('lastUpdated').textContent = 'Network/SSL Fail (TLS mismatch)';
-                document.querySelector('.station-name').textContent = 'Network/SSL Fail';
-            };
-            xhr.send();
-        }
+        var routeOrderData = null;
 
         var routeColors = {
             3: { background: '#FFBE00', text: '#000000' },
@@ -729,106 +662,42 @@
             13: { background: '#95979A', text: '#000000' }
         };
 
-        var applyRouteColorDirect = function(routeId) {
-            var colors = routeColors[routeId] || { background: '#95979A', text: '#000000' };
-            if (mainHeader) {
-                mainHeader.style.borderTopColor = colors.background;
-            }
-            if (platformElement) {
-                platformElement.style.backgroundColor = colors.background;
-                platformElement.style.color = colors.text;
-            }
-        };
-
-        var loadStations = function() {
-            apiGet('https://raw.githubusercontent.com/nymms/melbstations/main/stations.json', function(data) {
-                stationsData = data.stations;
-                initApp();
-            }, function(error) {
-                console.error('Failed to load stations.json:', error);
-            });
-        };
-
-        var routeOrderData = null;
-
-        var loadRouteOrder = function() {
-            apiGet('https://raw.githubusercontent.com/nymms/melbstations/main/route-order.json', function(data) {
-                routeOrderData = data.routes;
-            }, function(error) {
-                console.error('Failed to load route-order.json:', error);
-            });
-        };
-
-        var getRouteSegment = function(routeId, currentStopId, finalStopId) {
-            if (!routeOrderData) return null;
-
-            var routeStops = null;
-            var currentPos = -1;
-            var finalPos = -1;
-            var keys = Object.keys(routeOrderData);
-
-            for (var i = 0; i < keys.length; i++) {
-                var key = keys[i];
-                var route = routeOrderData[key];
-                var usable = key === String(routeId) || (route.route_ids && route.route_ids.indexOf(Number(routeId)) !== -1);
-                if (!usable) continue;
-                
-                var c = -1, f = -1;
-                for (var j = 0; j < route.stops.length; j++) {
-                    if (route.stops[j].stop_id === currentStopId) c = j;
-                    if (route.stops[j].stop_id === finalStopId) f = j;
-                }
-
-                if (c !== -1 && f !== -1) {
-                    routeStops = route.stops;
-                    currentPos = c;
-                    finalPos = f;
-                    break;
-                }
-            }
-
-            if (!routeStops) return null;
-            
-            var segment;
-            if (currentPos < finalPos) {
-                segment = routeStops.slice(currentPos, finalPos + 1);
-            } else {
-                segment = routeStops.slice(finalPos, currentPos + 1).reverse();
-            }
-            
-            return segment;
-        };
-
-        var detectExpressService = function(routeSegment, actualStops) {
-            if (!routeSegment || routeSegment.length === 0) return { isExpress: false, skipped: [] };
-            
-            var actualStopIds = [];
-            for (var i = 0; i < actualStops.length; i++) {
-                actualStopIds.push(actualStops[i].stop_id);
-            }
-
-            var skippedStations = [];
-            var consecutiveSkips = 0;
-            var maxConsecutiveSkips = 0;
-            
-            for (var i = 0; i < routeSegment.length; i++) {
-                var stop = routeSegment[i];
-                if (actualStopIds.indexOf(stop.stop_id) === -1) {
-                    skippedStations.push(stop);
-                    consecutiveSkips++;
-                    if (consecutiveSkips > maxConsecutiveSkips) {
-                        maxConsecutiveSkips = consecutiveSkips;
+        var ajaxGet = function(url, callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            var data = JSON.parse(xhr.responseText);
+                            callback(null, data);
+                        } catch (e) {
+                            callback(e, null);
+                        }
+                    } else {
+                        callback(new Error('HTTP Error ' + xhr.status), null);
                     }
-                } else {
-                    consecutiveSkips = 0;
                 }
-            }
-            
-            return {
-                isExpress: maxConsecutiveSkips >= 2,
-                skipped: skippedStations,
-                singleSkip: skippedStations.length === 1 ? skippedStations[0] : null
             };
+            xhr.send();
+        };
+
+        var loadStations = function(callback) {
+            ajaxGet('stations.json', function(err, data) {
+                if (!err && data && data.stations) {
+                    stationsData = data.stations;
+                }
+                callback();
+            });
+        };
+
+        var loadRouteOrder = function(callback) {
+            ajaxGet('route-order.json', function(err, data) {
+                if (!err && data && data.routes) {
+                    routeOrderData = data.routes;
+                }
+                callback();
+            });
         };
 
         var getStationName = function(stopId) {
@@ -851,378 +720,376 @@
             return false;
         };
 
-        var updateAddress = function() {
-            var params = [];
-            params.push('stop=' + currentStopId);
-            if (currentPlatform) params.push('platform=' + currentPlatform);
-            try {
-                if (history.replaceState) {
-                    history.replaceState(null, '', '?' + params.join('&'));
-                }
-            } catch(e) {}
+        var calculateDuration = function(scheduledTime, estimatedTime) {
+            var departureTime = new Date(estimatedTime || scheduledTime);
+            var now = new Date();
+            var diffMinutes = Math.floor((departureTime.getTime() - now.getTime()) / 60000);
+            
+            if (diffMinutes < 1) return "NOW";
+            if (diffMinutes < 60) return diffMinutes + " min";
+            var hours = Math.floor(diffMinutes / 60);
+            var mins = diffMinutes % 60;
+            return hours + "h " + mins + "m";
         };
-        
+
+        var updateAddress = function() {
+            var params = 'stop=' + currentStopId;
+            if (currentPlatform) params += '&platform=' + currentPlatform;
+            history.replaceState(null, '', '?' + params);
+        };
+
         var populateStationDropdown = function() {
             var select = document.getElementById('stationSelect');
-            if (stationsData) {
+            if (stationsData && select) {
+                select.innerHTML = '<option value="">Select Station...</option>';
                 for (var i = 0; i < stationsData.length; i++) {
-                    var station = stationsData[i];
                     var option = document.createElement('option');
-                    option.value = station.stop_id;
-                    option.textContent = station.stop_name;
+                    option.value = stationsData[i].stop_id;
+                    option.textContent = stationsData[i].stop_name;
                     select.appendChild(option);
                 }
-                
                 select.value = currentStopId;
-                
-                select.addEventListener('change', function(e) {
-                    currentStopId = parseInt(e.target.value);
+                select.onchange = function(e) {
+                    currentStopId = parseInt(e.target.value, 10);
                     if (currentStopId) {
                         isUserChange = true;
                         hideFutureDepartures();
                         updatePlatformDropdown();
                         updateAddress();
                         updateBoard();
+                        updateFutureDepartures();
                     }
-                });
-                
-                var platformSelect = document.getElementById('platformSelect');
-                platformSelect.addEventListener('change', function(e) {
-                    currentPlatform = e.target.value;
-                    updateAddress();
-                    isUserChange = true;
-                    hideFutureDepartures(); 
-                    updateBoard();
-                });
+                };
             }
         };
 
-        var updatePlatformDropdown = function(wantedPlatform) {
+        var updatePlatformDropdown = function() {
             var select = document.getElementById('platformSelect');
-            var station = null;
-            for (var i = 0; i < stationsData.length; i++) {
-                if (stationsData[i].stop_id === currentStopId) {
-                    station = stationsData[i];
-                    break;
+            if (!select) return;
+            var platformCount = 2;
+            if (stationsData) {
+                for (var i = 0; i < stationsData.length; i++) {
+                    if (stationsData[i].stop_id === currentStopId) {
+                        platformCount = stationsData[i].number_of_platforms || 2;
+                        break;
+                    }
                 }
             }
-            var platformCount = station ? station.number_of_platforms : 2;
             
             select.innerHTML = '<option value="">All Platforms</option>';
-            
-            for (var i = 1; i <= platformCount; i++) {
+            for (var p = 1; p <= platformCount; p++) {
                 var option = document.createElement('option');
-                option.value = i;
-                option.textContent = i;
+                option.value = p;
+                option.textContent = p + '';
                 select.appendChild(option);
             }
-            
-            var wanted = parseInt(wantedPlatform);
-            select.value = (wanted >= 1 && wanted <= platformCount) ? String(wanted) : (platformCount >= 1 ? "1" : "");
-            currentPlatform = select.value;
+            select.value = currentPlatform || "1";
+            select.onchange = function(e) {
+                currentPlatform = e.target.value;
+                updateAddress();
+                isUserChange = true;
+                hideFutureDepartures();
+                updateBoard();
+                updateFutureDepartures();
+            };
         };
 
         var loadStoppingPattern = function(runId, callback) {
-            apiGet('https://melbptboard-opt.onrender.com/api/run/stops?run_id=' + runId, function(data) {
-                callback(data.stops || []);
-            }, function(error) {
-                console.error('Failed to load stopping pattern:', error);
-                callback(null);
-            });
-        };  
-        
-        var MAX_SLOTS = 40;
-        var MESSAGE_FIRST_SLOT = 36;
-        var MESSAGE_LINES = [' Continues to'];
-        var TAIL_STOPS = 1;
-        
-        var calculateColumnDistribution = function(numStops) {
-            if (numStops <= 7) {
-                return { columns: 1, distribution: [numStops] };
-            }
-    
-            if (numStops <= 14) {
-                var col1 = Math.ceil(numStops / 2);
-                var col2 = numStops - col1;
-                return { columns: 2, distribution: [col1, col2] };
-            }
-    
-            if (numStops <= 24) {
-                var base = Math.floor(numStops / 3);
-                var remainder = numStops % 3;
-                var distribution = [base, base, base];
-        
-                for (var i = 0; i < remainder; i++) {
-                    distribution[i]++;
+            ajaxGet('/api/run/stops?run_id=' + runId, function(err, data) {
+                if (err || !data) {
+                    callback(null);
+                    return;
                 }
-                return { columns: 3, distribution: distribution };
-            }
-    
-            if (numStops <= 30) {
-                var col3 = numStops - 20;
-                return { columns: 3, distribution: [10, 10, col3] };
-            }
-    
-            var col4 = numStops - 30;
-            return { columns: 4, distribution: [10, 10, 10, col4] };
+                callback(data.stops || []);
+            });
         };
 
-        var analyzeInboundRoute = function(stops, currentStopId) {
+        var getRouteSegment = function(routeId, stopId, finalStopId) {
+            if (!routeOrderData) return null;
+            var routeStops = null;
+            var currentPos = -1;
+            var finalPos = -1;
+
+            var keys = Object.keys(routeOrderData);
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                var route = routeOrderData[key];
+                var usable = key === String(routeId) || (route.route_ids && route.route_ids.indexOf(Number(routeId)) !== -1);
+                if (!usable) continue;
+
+                var c = -1, f = -1;
+                for (var j = 0; j < route.stops.length; j++) {
+                    if (route.stops[j].stop_id === stopId) c = j;
+                    if (route.stops[j].stop_id === finalStopId) f = j;
+                }
+
+                if (c !== -1 && f !== -1) {
+                    routeStops = route.stops;
+                    currentPos = c;
+                    finalPos = f;
+                    break;
+                }
+            }
+
+            if (!routeStops) return null;
+
+            var segment;
+            if (currentPos < finalPos) {
+                segment = routeStops.slice(currentPos, finalPos + 1);
+            } else {
+                segment = routeStops.slice(finalPos, currentPos + 1).reverse();
+            }
+            return segment;
+        };
+
+        var detectExpressService = function(routeSegment, actualStops) {
+            if (!routeSegment || routeSegment.length === 0) return { isExpress: false, skipped: [] };
+            
+            var actualStopIds = [];
+            for (var i = 0; i < actualStops.length; i++) {
+                actualStopIds.push(actualStops[i].stop_id);
+            }
+
+            var skippedStations = [];
+            var consecutiveSkips = 0;
+            var maxConsecutiveSkips = 0;
+
+            for (var j = 0; j < routeSegment.length; j++) {
+                var stopId = routeSegment[j].stop_id;
+                if (actualStopIds.indexOf(stopId) === -1) {
+                    skippedStations.push(routeSegment[j]);
+                    consecutiveSkips++;
+                    if (consecutiveSkips > maxConsecutiveSkips) {
+                        maxConsecutiveSkips = consecutiveSkips;
+                    }
+                } else {
+                    consecutiveSkips = 0;
+                }
+            }
+
+            return {
+                isExpress: maxConsecutiveSkips >= 2,
+                skipped: skippedStations,
+                singleSkip: skippedStations.length === 1 ? skippedStations[0] : null
+            };
+        };
+
+        var calculateColumnDistribution = function(numStops) {
+            if (numStops <= 7) return { columns: 1, distribution: [numStops] };
+            if (numStops <= 14) {
+                var col1 = Math.ceil(numStops / 2);
+                return { columns: 2, distribution: [col1, numStops - col1] };
+            }
+            if (numStops <= 24) {
+                var base = Math.floor(numStops / 3);
+                var rem = numStops % 3;
+                var dist = [base, base, base];
+                for (var i = 0; i < rem; i++) dist[i]++;
+                return { columns: 3, distribution: dist };
+            }
+            if (numStops <= 30) return { columns: 3, distribution: [10, 10, numStops - 20] };
+            return { columns: 4, distribution: [10, 10, 10, numStops - 30] };
+        };
+
+        var analyzeInboundRoute = function(stops, stopId) {
             var cityStations = [1155, 1071, 1181, 1068, 1120];
             var loopStations = [1068, 1120, 1155];
             
             var currentIndex = -1;
             for (var i = 0; i < stops.length; i++) {
-                if (stops[i].stop_id === currentStopId) {
-                    currentIndex = i;
-                    break;
-                }
+                if (stops[i].stop_id === stopId) { currentIndex = i; break; }
             }
             if (currentIndex === -1) return null;
+
+            var futureCityStations = [];
+            for (var j = currentIndex + 1; j < stops.length; j++) {
+                futureCityStations.push(stops[j].stop_id);
+            }
+
+            var hasFutureCity = false;
+            var firstCity = null;
+            for (var k = 0; k < futureCityStations.length; k++) {
+                if (cityStations.indexOf(futureCityStations[k]) !== -1) {
+                    hasFutureCity = true;
+                    firstCity = futureCityStations[k];
+                    break;
+                }
+            }
+            if (!hasFutureCity) return null;
+
+            if (firstCity === 1071) return "Direct to Flinders Street";
             
-            var remainingStops = stops.slice(currentIndex);
-            var futureCityStationsOnly = [];
-            for (var i = 1; i < remainingStops.length; i++) {
-                futureCityStationsOnly.push(remainingStops[i].stop_id);
+            var hasLoop = false;
+            for (var l = 0; l < futureCityStations.length; l++) {
+                if (loopStations.indexOf(futureCityStations[l]) !== -1) { hasLoop = true; break; }
             }
-
-            var hasFutureCityStations = false;
-            for (var i = 0; i < futureCityStationsOnly.length; i++) {
-                if (cityStations.indexOf(futureCityStationsOnly[i]) !== -1) {
-                    hasFutureCityStations = true;
-                    break;
-                }
-            }
-            if (!hasFutureCityStations) return null;
-
-            var firstCityStation = null;
-            for (var i = 0; i < futureCityStationsOnly.length; i++) {
-                if (cityStations.indexOf(futureCityStationsOnly[i]) !== -1) {
-                    firstCityStation = futureCityStationsOnly[i];
-                    break;
-                }
-            }
-
-            if (firstCityStation === 1071) {
-                return "Direct to Flinders Street";
-            }
-
-            var hasLoopStations = false;
-            for (var i = 0; i < futureCityStationsOnly.length; i++) {
-                if (loopStations.indexOf(futureCityStationsOnly[i]) !== -1) {
-                    hasLoopStations = true;
-                    break;
-                }
-            }
-
-            if (hasLoopStations) return "via the City Loop";
-            if (firstCityStation === 1181) return "via Southern Cross";
-
+            if (hasLoop) return "via the City Loop";
+            if (firstCity === 1181) return "via Southern Cross";
             return "to City";
         };
 
-        var analyzeOutboundRoute = function(stops, currentStopId, expressInfo) {
+        var analyzeOutboundRoute = function(stops, stopId, expressInfo) {
             var loopStations = [1068, 1120, 1155];
+            var tunnelStations = [1232, 1233, 1234, 1235, 1236];
             
             var currentIndex = -1;
             for (var i = 0; i < stops.length; i++) {
-                if (stops[i].stop_id === currentStopId) {
-                    currentIndex = i;
-                    break;
-                }
+                if (stops[i].stop_id === stopId) { currentIndex = i; break; }
             }
             if (currentIndex === -1) return null;
-            
-            var remainingStops = stops.slice(currentIndex);
-            var futureStopIds = [];
-            for (var i = 0; i < remainingStops.length; i++) {
-                futureStopIds.push(remainingStops[i].stop_id);
-            }
-            
-            var hasFutureLoopStations = false;
-            for (var i = 0; i < futureStopIds.length; i++) {
-                if (loopStations.indexOf(futureStopIds[i]) !== -1) {
-                    hasFutureLoopStations = true;
-                    break;
-                }
+
+            var futureIds = [];
+            for (var j = currentIndex; j < stops.length; j++) {
+                futureIds.push(stops[j].stop_id);
             }
 
-            var tunnelStations = [1232, 1233, 1234, 1235, 1236];
-            var hasFutureTunnelStations = false;
-            for (var i = 1; i < futureStopIds.length; i++) {
-                if (tunnelStations.indexOf(futureStopIds[i]) !== -1) {
-                    hasFutureTunnelStations = true;
-                    break;
-                }
+            var hasLoop = false;
+            for (var l = 0; l < futureIds.length; l++) {
+                if (loopStations.indexOf(futureIds[l]) !== -1) { hasLoop = true; break; }
             }
-            
+
+            var hasTunnel = false;
+            for (var t = 1; t < futureIds.length; t++) {
+                if (tunnelStations.indexOf(futureIds[t]) !== -1) { hasTunnel = true; break; }
+            }
+
             var baseText = "Stopping all stations";
             if (expressInfo && expressInfo.isExpress) {
                 baseText = "Express";
             } else if (expressInfo && expressInfo.singleSkip) {
-                var skippedStationName = getStationName(expressInfo.singleSkip.stop_id);
-                baseText = "Stopping all stations except " + skippedStationName;
+                baseText = "Stopping all stations except " + getStationName(expressInfo.singleSkip.stop_id);
             }
-            
-            if (hasFutureLoopStations) return baseText + " via City Loop";
-            if (hasFutureTunnelStations) return baseText + " via Metro Tunnel";
-            
+
+            if (hasLoop) return baseText + " via City Loop";
+            if (hasTunnel) return baseText + " via Metro Tunnel";
             return baseText;
         };
 
-        var showNoDeparturesMessage = function(platformFilter) {
+        var showNoDeparturesMessage = function() {
             var stationsList = document.querySelector('.stations-list');
-            var existingColumns = stationsList.querySelectorAll('.stations-column');
-            for (var i = 0; i < existingColumns.length; i++) {
-                existingColumns[i].parentNode.removeChild(existingColumns[i]);
-            }
-            
+            if (stationsList) stationsList.innerHTML = '';
             if (departureTimeElement) departureTimeElement.style.display = 'none';
             if (delayIndicatorElement) delayIndicatorElement.style.display = 'none';
             if (durationElement) durationElement.style.display = 'none';
             if (platformElement) platformElement.style.display = 'none';
             if (routeInfoElement) routeInfoElement.textContent = '';
             
-            departureItem.className = departureItem.className + ' has-no-trains';
             var nextStationsDiv = document.querySelector('.route-info');
             if (nextStationsDiv) {
                 nextStationsDiv.innerHTML = '<div class="no-trains">No trains are departing from<br>this platform</div>';
             }
-
             if (destinationElement) destinationElement.textContent = '';
-            if (lastUpdatedElement) lastUpdatedElement.textContent = 'Last updated: ' + new Date().toLocaleTimeString();
             if (stationNameElement) stationNameElement.textContent = getStationName(currentStopId);
             if (headerPlatformElement) headerPlatformElement.textContent = currentPlatform || '?';
         };
 
         var restoreNormalDisplay = function() {
-            departureItem.className = 'departure-item';
             var routeInfoContainer = document.querySelector('.departure-item .route-info');
             if (routeInfoContainer) routeInfoContainer.innerHTML = '<span></span>';
-
-            var stationsList = document.querySelector('.stations-list');
-            if (stationsList) stationsList.innerHTML = '';
-            
             if (departureTimeElement) departureTimeElement.style.display = '';
             if (delayIndicatorElement) delayIndicatorElement.style.display = '';
             if (durationElement) durationElement.style.display = '';
             if (platformElement) platformElement.style.display = '';
-            
-            if (destinationElement) {
-                destinationElement.style.textAlign = '';
-                destinationElement.style.width = '';
-            }
         };
 
-        var populateStationDivs = function(stops, currentStopId, finalStopId, routeId) {
+        var populateStationDivs = function(stops, stopId, finalStopId, routeId) {
             var stationsList = document.querySelector('.stations-list');
-            var existingColumns = stationsList.querySelectorAll('.stations-column');
-            for (var i = 0; i < existingColumns.length; i++) {
-                existingColumns[i].parentNode.removeChild(existingColumns[i]);
-            }
-            
-            if (!stops || stops.length === 0) return;
-            
-            var routeSegment = getRouteSegment(routeId, currentStopId, finalStopId);
+            if (!stationsList) return null;
+            stationsList.innerHTML = '';
+
+            if (!stops || stops.length === 0) return null;
+
+            var routeSegment = getRouteSegment(routeId, stopId, finalStopId);
             var cityStops = [];
             var suburbanStartIndex = 0;
-            
+
             if (!routeSegment) {
                 var currentIndex = -1;
                 for (var i = 0; i < stops.length; i++) {
-                    if (stops[i].stop_id === currentStopId) { currentIndex = i; break; }
+                    if (stops[i].stop_id === stopId) { currentIndex = i; break; }
                 }
-                
-                for (var i = currentIndex; i < stops.length; i++) {
-                    var testSegment = getRouteSegment(routeId, stops[i].stop_id, finalStopId);
+
+                for (var j = currentIndex; j < stops.length; j++) {
+                    var testSegment = getRouteSegment(routeId, stops[j].stop_id, finalStopId);
                     if (testSegment) {
                         routeSegment = testSegment;
-                        suburbanStartIndex = i;
-                        cityStops = stops.slice(currentIndex, i);
+                        suburbanStartIndex = j;
+                        cityStops = stops.slice(currentIndex, j);
                         break;
                     }
                 }
-                
+
                 if (!routeSegment) {
-                    var stopsToShow = currentIndex >= 0 ? stops.slice(currentIndex) : stops;
-                    populateActualStopsOnly(stopsToShow, finalStopId);
-                    return;
+                    populateActualStopsOnly(currentIndex >= 0 ? stops.slice(currentIndex) : stops, finalStopId);
+                    return null;
                 }
             }
-            
+
             var suburbanStops = stops.slice(suburbanStartIndex);
             var expressInfo = detectExpressService(routeSegment, suburbanStops);
+            
             var actualStopIds = [];
-            for (var i = 0; i < suburbanStops.length; i++) {
-                actualStopIds.push(suburbanStops[i].stop_id);
+            for (var s = 0; s < suburbanStops.length; s++) {
+                actualStopIds.push(suburbanStops[s].stop_id);
             }
-            
+
             var totalStops = cityStops.length + routeSegment.length;
-            var needsMessage = totalStops > MAX_SLOTS;
-            var colDist = calculateColumnDistribution(needsMessage ? MAX_SLOTS : totalStops);
-            var numColumns = colDist.columns;
-            var distribution = colDist.distribution;
-            
-            for (var i = 0; i < numColumns; i++) {
+            var maxSlots = 40;
+            var needsMessage = totalStops > maxSlots;
+            var distObj = calculateColumnDistribution(needsMessage ? maxSlots : totalStops);
+            var numColumns = distObj.columns;
+            var distribution = distObj.distribution;
+
+            for (var c = 0; c < numColumns; c++) {
                 var column = document.createElement('div');
                 column.className = 'stations-column route-color';
                 stationsList.appendChild(column);
             }
-            
+
             var columns = stationsList.querySelectorAll('.stations-column');
             var stationIndex = 0;
             var slot = 0;
-            
-            for (var colIndex = 0; colIndex < numColumns; colIndex++) {
-                var stationsInThisColumn = distribution[colIndex];
-                
-                for (var i = 0; i < stationsInThisColumn && stationIndex < totalStops; i++) {
-                    if (needsMessage && slot >= MESSAGE_FIRST_SLOT && slot < MESSAGE_FIRST_SLOT + MESSAGE_LINES.length) {
-                        var messageDiv = document.createElement('div');
-                        messageDiv.className = 'next-station continuing route-color';
-                        var messageText = document.createElement('span');
-                        messageText.className = 'station-text';
-                        messageText.textContent = MESSAGE_LINES[slot - MESSAGE_FIRST_SLOT];
-                        messageDiv.appendChild(messageText);
-                        columns[colIndex].appendChild(messageDiv);
+
+            for (var colIdx = 0; colIdx < numColumns; colIdx++) {
+                var countInCol = distribution[colIdx];
+                for (var itemIdx = 0; itemIdx < countInCol && stationIndex < totalStops; itemIdx++) {
+                    if (needsMessage && slot >= 36 && slot < 37) {
+                        var msgDiv = document.createElement('div');
+                        msgDiv.className = 'next-station continuing route-color';
+                        var msgText = document.createElement('span');
+                        msgText.className = 'station-text';
+                        msgText.textContent = ' Continues to';
+                        msgDiv.appendChild(msgText);
+                        columns[colIdx].appendChild(msgDiv);
                         slot++;
                         continue;
                     }
-                    if (needsMessage && slot === MESSAGE_FIRST_SLOT + MESSAGE_LINES.length) {
-                        stationIndex = totalStops - TAIL_STOPS;
+                    if (needsMessage && slot === 37) {
+                        stationIndex = totalStops - 1;
                     }
 
-                    var stationDiv, stationText;
+                    var stationDiv = document.createElement('div');
+                    var stationText = document.createElement('span');
+                    stationText.className = 'station-text';
+
                     if (stationIndex < cityStops.length) {
                         var cityStop = cityStops[stationIndex];
-                        stationDiv = document.createElement('div');
                         stationDiv.className = 'next-station route-color';
-                        
-                        if (stationIndex === 0) stationDiv.className += ' current';
-                        if (isInterchangeStation(cityStop.stop_id)) stationDiv.className += ' interchange';
-
-                        stationText = document.createElement('span');
-                        stationText.className = 'station-text';
+                        if (stationIndex === 0) stationDiv.classList.add('current');
+                        if (isInterchangeStation(cityStop.stop_id)) stationDiv.classList.add('interchange');
                         stationText.textContent = getStationName(cityStop.stop_id);
                     } else {
-                        var suburbanIndex = stationIndex - cityStops.length;
-                        var routeStop = routeSegment[suburbanIndex];
-                        var isActualStop = actualStopIds.indexOf(routeStop.stop_id) !== -1;
-                        
-                        stationDiv = document.createElement('div');
-                        stationDiv.className = isActualStop ? 'next-station route-color' : 'next-station skipped route-color';
-                        
-                        if (stationIndex === 0) stationDiv.className += ' current';
-                        if (routeStop.stop_id === finalStopId) stationDiv.className += ' last-station';
-                        if (isInterchangeStation(routeStop.stop_id)) stationDiv.className += ' interchange';
- 
-                        stationText = document.createElement('span');
-                        stationText.className = 'station-text';
+                        var routeStop = routeSegment[stationIndex - cityStops.length];
+                        var isActual = actualStopIds.indexOf(routeStop.stop_id) !== -1;
+                        stationDiv.className = isActual ? 'next-station route-color' : 'next-station skipped route-color';
+                        if (stationIndex === 0) stationDiv.classList.add('current');
+                        if (routeStop.stop_id === finalStopId) stationDiv.classList.add('last-station');
+                        if (isInterchangeStation(routeStop.stop_id)) stationDiv.classList.add('interchange');
                         stationText.textContent = getStationName(routeStop.stop_id);
                     }
-                    
+
                     stationDiv.appendChild(stationText);
-                    columns[colIndex].appendChild(stationDiv);
+                    columns[colIdx].appendChild(stationDiv);
                     stationIndex++;
                     slot++;
                 }
@@ -1232,123 +1099,55 @@
 
         var populateActualStopsOnly = function(stopsToShow, finalStopId) {
             var stationsList = document.querySelector('.stations-list');
-            var needsMessage = stopsToShow.length > MAX_SLOTS;
-            var colDist = calculateColumnDistribution(needsMessage ? MAX_SLOTS : stopsToShow.length);
-            var numColumns = colDist.columns;
-            var distribution = colDist.distribution;
-            
-            for (var i = 0; i < numColumns; i++) {
+            if (!stationsList) return;
+            var maxSlots = 40;
+            var needsMessage = stopsToShow.length > maxSlots;
+            var distObj = calculateColumnDistribution(needsMessage ? maxSlots : stopsToShow.length);
+            var numColumns = distObj.columns;
+            var distribution = distObj.distribution;
+
+            for (var c = 0; c < numColumns; c++) {
                 var column = document.createElement('div');
                 column.className = 'stations-column route-color';
                 stationsList.appendChild(column);
             }
-            
+
             var columns = stationsList.querySelectorAll('.stations-column');
             var stationIndex = 0;
             var slot = 0;
-            
-            for (var colIndex = 0; colIndex < numColumns; colIndex++) {
-                var stationsInThisColumn = distribution[colIndex];
-                
-                for (var i = 0; i < stationsInThisColumn && stationIndex < stopsToShow.length; i++) {
-                    if (needsMessage && slot >= MESSAGE_FIRST_SLOT && slot < MESSAGE_FIRST_SLOT + MESSAGE_LINES.length) {
-                        var messageDiv = document.createElement('div');
-                        messageDiv.className = 'next-station continuing route-color';
-                        var messageText = document.createElement('span');
-                        messageText.className = 'station-text';
-                        messageText.textContent = MESSAGE_LINES[slot - MESSAGE_FIRST_SLOT];
-                        messageDiv.appendChild(messageText);
-                        columns[colIndex].appendChild(messageDiv);
-                        slot++;
-                        continue;
-                    }
-                    if (needsMessage && slot === MESSAGE_FIRST_SLOT + MESSAGE_LINES.length) {
-                        stationIndex = stopsToShow.length - TAIL_STOPS;
-                    }
 
+            for (var colIdx = 0; colIdx < numColumns; colIdx++) {
+                var countInCol = distribution[colIdx];
+                for (var itemIdx = 0; itemIdx < countInCol && stationIndex < stopsToShow.length; itemIdx++) {
                     var stop = stopsToShow[stationIndex];
                     var stationDiv = document.createElement('div');
                     stationDiv.className = 'next-station route-color';
-                    
-                    if (stationIndex === 0) stationDiv.className += ' current';
-                    if (stop.stop_id === finalStopId) stationDiv.className += ' last-station';
-                    if (isInterchangeStation(stop.stop_id)) stationDiv.className += ' interchange';
+                    if (stationIndex === 0) stationDiv.classList.add('current');
+                    if (stop.stop_id === finalStopId) stationDiv.classList.add('last-station');
+                    if (isInterchangeStation(stop.stop_id)) stationDiv.classList.add('interchange');
 
                     var stationText = document.createElement('span');
                     stationText.className = 'station-text';
                     stationText.textContent = getStationName(stop.stop_id);
-                    
+
                     stationDiv.appendChild(stationText);
-                    columns[colIndex].appendChild(stationDiv);
+                    columns[colIdx].appendChild(stationDiv);
                     stationIndex++;
                     slot++;
                 }
             }
         };
 
-        var calculateDuration = function(scheduledTime, estimatedTime) {
-            var departureTime = new Date(estimatedTime || scheduledTime);
-            var now = new Date();
-            var diffMinutes = Math.floor((departureTime - now) / 60000);
-            
-            if (diffMinutes < 1) return "Now";
-            if (diffMinutes < 60) return diffMinutes + " min";
-            var hours = Math.floor(diffMinutes / 60);
-            var mins = diffMinutes % 60;
-            return hours + "h " + mins + "m";
-        };
-
-        var revealTimer = null;
-        var extraWaits = 0;
-        var REVEAL_SECONDS = 4;
-        
-        var hideControls = function() {
-            if (settingsPanel.contains(document.activeElement) && extraWaits < 3) {
-                extraWaits++;
-                revealTimer = setTimeout(hideControls, 2000);
-                return;
-            }
-            extraWaits = 0;
-            stationBoardElement.className = stationBoardElement.className.replace(' revealed', '');
-            settingsPanel.className = settingsPanel.className.replace(' visible', '');
-            settingsButton.setAttribute('aria-expanded', 'false');
-        };
-        
-        var reveal = function() {
-            if (stationBoardElement.className.indexOf('touch-mode') === -1) return;
-            extraWaits = 0;
-            if (stationBoardElement.className.indexOf('revealed') === -1) {
-                stationBoardElement.className += ' revealed';
-            }
-            clearTimeout(revealTimer);
-            revealTimer = setTimeout(hideControls, REVEAL_SECONDS * 1000);
-        };
-        
-        stationBoardElement.addEventListener('click', function(e) {
-            reveal();
-        }, true);
-
-        var toggleSettings = function() {
-            var isVisible = settingsPanel.className.indexOf('visible') !== -1;
-            if (isVisible) {
-                settingsPanel.className = settingsPanel.className.replace(' visible', '');
-            } else {
-                settingsPanel.className += ' visible';
-            }
-            settingsButton.setAttribute('aria-expanded', !isVisible);            
-            reveal();
-        };
-
         var updateBoard = function() {
-            apiGet(getDepartureApiUrl(), function(data) {
-                if (data.platform_number === null) {
-                    showNoDeparturesMessage(currentPlatform);
+            ajaxGet(getDepartureApiUrl(), function(err, data) {
+                if (err || !data || data.platform_number === null) {
+                    showNoDeparturesMessage();
                     currentRunId = null;
                     return;
                 }
 
-                if (currentPlatform && data.platform_number !== currentPlatform) {
-                    showNoDeparturesMessage(currentPlatform);
+                if (currentPlatform && String(data.platform_number) !== String(currentPlatform)) {
+                    showNoDeparturesMessage();
                     currentRunId = null;
                     return;
                 }
@@ -1357,187 +1156,80 @@
                 var platform_number = data.platform_number;
                 var scheduled_departure_utc = data.scheduled_departure_utc;
                 var estimated_departure_utc = data.estimated_departure_utc;
-                var delay_minutes = data.delay_minutes;
+                var delay_minutes = data.delay_minutes || 0;
                 var final_stop_id = data.final_stop_id;
                 var run_id = data.run_id;
+
+                var colors = routeColors[route_id] || { background: '#95979A', text: '#000000' };
+                departureItem.style.setProperty('--route-bg-color', colors.background);
+                departureItem.style.setProperty('--route-text-color', colors.text);
                 
-                var isNewService = run_id !== currentRunId;
+                // Direct color application for iOS 9 Safari border/background support
+                var depHeader = document.querySelector('.departure-header');
+                if (depHeader) depHeader.style.borderTopColor = colors.background;
                 
-                if (isNewService) {
+                var platformElem = document.querySelector('.departure-header .platform');
+                if (platformElem) {
+                    platformElem.style.backgroundColor = colors.background;
+                    platformElem.style.color = colors.text;
+                }
+
+                // Also apply route color to future headers
+                var futureHeaders = document.querySelectorAll('.departure-header.future');
+                for (var f = 0; f < futureHeaders.length; f++) {
+                    futureHeaders[f].style.borderLeftColor = colors.background;
+                }
+
+                if (platformElement) platformElement.textContent = platform_number || '?';
+                if (headerPlatformElement) headerPlatformElement.textContent = platform_number || '?';
+                if (stationNameElement) stationNameElement.textContent = getStationName(currentStopId);
+                if (destinationElement) destinationElement.textContent = getStationName(final_stop_id);
+
+                if (departureTimeElement && scheduled_departure_utc) {
+                    var date = new Date(scheduled_departure_utc);
+                    var hours = date.getHours();
+                    var minutes = date.getMinutes();
+                    var ampm = hours >= 12 ? 'pm' : 'am';
+                    hours = hours % 12;
+                    hours = hours ? hours : 12;
+                    var minStr = minutes < 10 ? '0' + minutes : minutes;
+                    departureTimeElement.textContent = hours + ':' + minStr + ampm;
+                }
+
+                if (delayIndicatorElement) {
+                    delayIndicatorElement.textContent = delay_minutes >= 2 ? '+' + delay_minutes : '';
+                }
+
+                if (durationElement) {
+                    durationElement.textContent = calculateDuration(scheduled_departure_utc, estimated_departure_utc);
+                }
+
+                if (lastUpdatedElement) {
+                    var now = new Date();
+                    lastUpdatedElement.textContent = 'Last updated: ' + now.toLocaleTimeString();
+                }
+
+                if (run_id !== currentRunId) {
                     currentRunId = run_id;
-                    applyRouteColorDirect(route_id);
-                    
-                    if (platformElement) platformElement.textContent = platform_number || '?';
-                    if (headerPlatformElement) headerPlatformElement.textContent = platform_number || '?';
-                    if (stationNameElement) stationNameElement.textContent = getStationName(currentStopId);
-                    
-                    var destinationName = getStationName(final_stop_id);
-                    if (destinationElement) destinationElement.textContent = destinationName;
-                    
                     loadStoppingPattern(run_id, function(stops) {
                         var nextStationsDiv = document.querySelector('.route-info');
                         if (nextStationsDiv && nextStationsDiv.querySelector('.no-trains')) {
                             restoreNormalDisplay();
                         }
-                        
                         if (stops) {
                             var expressInfo = populateStationDivs(stops, currentStopId, final_stop_id, route_id);
                             var routeInfo = analyzeInboundRoute(stops, currentStopId);
                             if (!routeInfo) {
                                 routeInfo = analyzeOutboundRoute(stops, currentStopId, expressInfo);
                             }
-                            
-                            var currentRouteInfoElement = document.querySelector('.route-info span');
-                            if (currentRouteInfoElement && routeInfo) {
-                                currentRouteInfoElement.textContent = routeInfo;
+                            var currentRouteInfoElem = document.querySelector('.route-info span');
+                            if (currentRouteInfoElem && routeInfo) {
+                                currentRouteInfoElem.textContent = routeInfo;
                             }
                         }
                     });
                 }
-                
-                if (departureTimeElement) {
-                    var timeString = new Date(scheduled_departure_utc).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-                    timeString = timeString.replace('AM', 'am').replace('PM', 'pm');
-                    departureTimeElement.textContent = timeString;
-                }
-                
-                if (delayIndicatorElement) {
-                    if (delay_minutes >= 2) {
-                        delayIndicatorElement.textContent = '+' + delay_minutes;
-                    } else {
-                        delayIndicatorElement.textContent = '';
-                    }
-                }
-                
-                if (durationElement) {
-                    durationElement.textContent = calculateDuration(scheduled_departure_utc, estimated_departure_utc);
-                }
-                
-                if (lastUpdatedElement) {
-                    lastUpdatedElement.textContent = 'Last updated: ' + new Date().toLocaleTimeString();
-                }
-            }, function(error) {
-                if (error && error.status === 404) {
-                    showNoDeparturesMessage(currentPlatform);
-                    currentRunId = null;
-                    return;
-                }
-                currentRunId = null;
-                if (lastUpdatedElement) {
-                    lastUpdatedElement.textContent = 'Error loading data';
-                }
             });
-        };
-
-        settingsButton.addEventListener('click', toggleSettings);
-
-        var cssDeparture = document.getElementById('cssDeparture');
-        var themeLink = document.getElementById('departure-link');
-        var cssHeader = document.getElementById('cssHeader');
-        var theme2Link = document.getElementById('header-link');
-
-        var savedTheme = 'light.css';
-        try { savedTheme = localStorage.getItem('theme') || 'light.css'; } catch(e){}
-        themeLink.href = savedTheme;
-        cssDeparture.value = savedTheme;
-
-        var savedTheme2 = 'ptvnetwork2019.css';
-        try { savedTheme2 = localStorage.getItem('theme2') || 'ptvnetwork2019.css'; } catch(e){}
-        theme2Link.href = savedTheme2;
-        cssHeader.value = savedTheme2;
-
-        cssDeparture.addEventListener('change', function(e) {
-            var newTheme = e.target.value;
-            themeLink.href = newTheme;
-            try { localStorage.setItem('theme', newTheme); } catch(err){}
-        });
-
-        cssHeader.addEventListener('change', function(e) {
-            var newTheme2 = e.target.value;
-            theme2Link.href = newTheme2;
-            try { localStorage.setItem('theme2', newTheme2); } catch(err){}
-        });
-
-        var updateFutureDepartures = function() {
-            if (isUserChange) {
-                setTimeout(function() { isUserChange = false; }, 500);
-            }
-
-            var baseUrl = 'https://melbptboard-opt.onrender.com/api/departures?stop_id=' + currentStopId + '&max_results=3';
-            var url = currentPlatform ? baseUrl + '&platform=' + currentPlatform : baseUrl;
-            
-            apiGet(url, function(data) {
-                if (data && data.departures) {
-                    var futureDeps = data.departures.slice(1, 3);
-                    if (futureDeps.length === 0) {
-                        hideFutureDepartures();
-                        return;
-                    }
-                    populateFutureDeparture(futureDeps[0], 0);
-                    populateFutureDeparture(futureDeps[1], 1);
-                }
-            }, function(error) {
-                hideFutureDepartures();
-            });
-        };
-
-        var populateFutureDeparture = function(departure, index) {
-            var futureItems = document.querySelectorAll('.departure-item.future');
-            var item = futureItems[index];
-            if (!item) return;
-            
-            if (!departure) {
-                item.style.display = 'none';
-                return;
-            }
-            
-            item.style.display = 'block';
-            var colors = routeColors[departure.route_id] || { background: '#95979A', text: '#000000' };
-            var futureHeader = item.querySelector('.departure-header.future');
-            if (futureHeader) {
-                futureHeader.style.borderLeftColor = colors.background;
-            }
-            
-            var timeElement = item.querySelector('.departure-time.future');
-            if (timeElement && departure.scheduled_departure_utc) {
-                var timeString = new Date(departure.scheduled_departure_utc).toLocaleTimeString('en-US', { 
-                    hour: 'numeric', 
-                    minute: '2-digit', 
-                    hour12: true 
-                });
-                timeString = timeString.replace('AM', 'am').replace('PM', 'pm');
-                timeElement.textContent = timeString;
-            }
-            
-            var destElement = item.querySelector('.destination.future');
-            if (destElement) {
-                var finalStopId = departure.final_stop_id || departure.direction_id;
-                destElement.textContent = getStationName(finalStopId);
-            }
-            
-            var delayElement = item.querySelector('.delay-indicator.future');
-            if (delayElement) {
-                if (departure.delay_minutes >= 2) {
-                    delayElement.textContent = '+' + departure.delay_minutes;
-                    delayElement.style.display = '';
-                } else {
-                    delayElement.textContent = '';
-                    delayElement.style.display = 'none';
-                }
-            }
-            
-            var durationElement = item.querySelector('.duration.future');
-            if (durationElement) {
-                durationElement.textContent = calculateDuration(
-                    departure.scheduled_departure_utc, 
-                    departure.estimated_departure_utc
-                );
-            }
-            
-            var routeInfoElement = item.querySelector('.route-info.future');
-            if (routeInfoElement) {
-                routeInfoElement.textContent = 'Stopping all stations';
-            }
         };
 
         var hideFutureDepartures = function() {
@@ -1547,53 +1239,165 @@
             }
         };
 
-        var initApp = function() {
-            loadRouteOrder();
-            var stationExists = false;
-            for (var i = 0; i < stationsData.length; i++) {
-                if (stationsData[i].stop_id === currentStopId) {
-                    stationExists = true;
-                    break;
+        var populateFutureDeparture = function(departure, index) {
+            var futureItems = document.querySelectorAll('.departure-item.future');
+            var item = futureItems[index];
+            if (!item) return;
+
+            if (!departure) {
+                item.style.display = 'none';
+                return;
+            }
+            item.style.display = 'block';
+
+            var colors = routeColors[departure.route_id] || { background: '#95979A', text: '#000000' };
+            item.style.setProperty('--route-bg-color', colors.background);
+            item.style.setProperty('--route-text-color', colors.text);
+
+            var timeElem = item.querySelector('.departure-time.future');
+            if (timeElem && departure.scheduled_departure_utc) {
+                var date = new Date(departure.scheduled_departure_utc);
+                var hours = date.getHours();
+                var minutes = date.getMinutes();
+                var ampm = hours >= 12 ? 'pm' : 'am';
+                hours = hours % 12;
+                hours = hours ? hours : 12;
+                var minStr = minutes < 10 ? '0' + minutes : minutes;
+                timeElem.textContent = hours + ':' + minStr + ampm;
+            }
+
+            var destElem = item.querySelector('.destination.future');
+            if (destElem) {
+                var finalStopId = departure.final_stop_id || departure.direction_id;
+                destElem.textContent = getStationName(finalStopId);
+            }
+
+            var delayElem = item.querySelector('.delay-indicator.future');
+            if (delayElem) {
+                if (departure.delay_minutes >= 2) {
+                    delayElem.textContent = '+' + departure.delay_minutes;
+                    delayElem.style.display = '';
+                } else {
+                    delayElem.textContent = '';
+                    delayElem.style.display = 'none';
                 }
             }
-            if (!stationExists) {
-                currentStopId = 1127;
-                currentPlatform = "1";
+
+            var durElem = item.querySelector('.duration.future');
+            if (durElem) {
+                durElem.textContent = calculateDuration(departure.scheduled_departure_utc, departure.estimated_departure_utc);
             }
-            populateStationDropdown();
-            updatePlatformDropdown(currentPlatform);
-            updateBoard();
-            updateFutureDepartures();
-            
-            setInterval(function() {
-                updateBoard();
-                updateFutureDepartures();
-            }, 20000);
+
+            var routeInfoElem = item.querySelector('.route-info.future');
+            if (routeInfoElem) {
+                routeInfoElem.textContent = 'Stopping all stations';
+            }
         };
 
-        loadStations();
+        var updateFutureDepartures = function() {
+            var baseUrl = '/api/departures?stop_id=' + currentStopId + '&max_results=3';
+            var url = currentPlatform ? baseUrl + '&platform=' + currentPlatform : baseUrl;
+
+            ajaxGet(url, function(err, data) {
+                if (err || !data || !data.departures) {
+                    hideFutureDepartures();
+                    return;
+                }
+                var futureDeps = data.departures.slice(1, 3);
+                if (futureDeps.length === 0) {
+                    hideFutureDepartures();
+                    return;
+                }
+                populateFutureDeparture(futureDeps[0], 0);
+                populateFutureDeparture(futureDeps[1], 1);
+            });
+        };
+
+        // Initialize Data Load & Settings Panel
+        loadStations(function() {
+            loadRouteOrder(function() {
+                if (!stationsData) return;
+                var found = false;
+                for (var i = 0; i < stationsData.length; i++) {
+                    if (stationsData[i].stop_id === currentStopId) { found = true; break; }
+                }
+                if (!found) {
+                    currentStopId = 1127;
+                    currentPlatform = "1";
+                }
+                populateStationDropdown();
+                updatePlatformDropdown();
+                
+                // Setup Settings Toggle & CSS Switchers for iOS 9
+                var settingsBtn = document.getElementById('settingsButton');
+                var settingsPanel = document.getElementById('settings-panel');
+                var boardElem = document.querySelector('.station-board');
+                
+                if (settingsBtn && settingsPanel) {
+                    settingsBtn.onclick = function() {
+                        var isVis = settingsPanel.style.opacity === '1';
+                        settingsPanel.style.opacity = isVis ? '0' : '1';
+                        settingsPanel.style.visibility = isVis ? 'hidden' : 'visible';
+                        boardElem.classList.toggle('revealed', !isVis);
+                    };
+                }
+
+                var cssDeparture = document.getElementById('cssDeparture');
+                var themeLink = document.getElementById('departure-link');
+                var savedTheme = localStorage.getItem('theme') || 'light.css';
+                if (themeLink && cssDeparture) {
+                    themeLink.href = savedTheme;
+                    cssDeparture.value = savedTheme;
+                    cssDeparture.onchange = function(e) {
+                        var newTheme = e.target.value;
+                        themeLink.href = newTheme;
+                        localStorage.setItem('theme', newTheme);
+                    };
+                }
+
+                var cssHeader = document.getElementById('cssHeader');
+                var theme2Link = document.getElementById('header-link');
+                var savedTheme2 = localStorage.getItem('theme2') || 'ptvnetwork2019.css';
+                if (theme2Link && cssHeader) {
+                    theme2Link.href = savedTheme2;
+                    cssHeader.value = savedTheme2;
+                    cssHeader.onchange = function(e) {
+                        var newTheme2 = e.target.value;
+                        theme2Link.href = newTheme2;
+                        localStorage.setItem('theme2', newTheme2);
+                    };
+                }
+
+                updateBoard();
+                updateFutureDepartures();
+
+                setInterval(function() {
+                    updateBoard();
+                    updateFutureDepartures();
+                }, 20000);
+            });
+        });
     });
 
     function updateClock() {
         var now = new Date();
         var hours = now.getHours();
-        var minutes = String(now.getMinutes());
-        if (minutes.length < 2) minutes = '0' + minutes;
-        var seconds = String(now.getSeconds());
-        if (seconds.length < 2) seconds = '0' + seconds;
-        var period = (hours >= 12) ? 'pm' : 'am';
-        hours = hours % 12; 
-        hours = hours ? hours : 12; 
-        var timeString = hours + ':' + minutes + ':' + seconds + ' ' + period;
+        var minutes = now.getMinutes();
+        var seconds = now.getSeconds();
+        var ampm = hours >= 12 ? 'pm' : 'am';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        var minStr = minutes < 10 ? '0' + minutes : minutes;
+        var secStr = seconds < 10 ? '0' + seconds : seconds;
         var clockElement = document.getElementById('live-clock');
         if (clockElement) {
-            clockElement.textContent = timeString;
+            clockElement.textContent = hours + ':' + minStr + ':' + secStr + ' ' + ampm;
         }
     }
+
     window.onload = function() {
         updateClock();
         setInterval(updateClock, 1000);
-    }
+    };
     </script>
-</body>
 </html>
